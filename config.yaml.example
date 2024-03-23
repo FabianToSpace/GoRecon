@@ -1,4 +1,5 @@
-port-range: 1-65535
-output-format: json
-output-file: recon.json
+portrange: 1-65535
+outputformat: json
+outputfile: recon.json
 debug: false
+threads: 10

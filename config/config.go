@@ -14,6 +14,7 @@ type Config struct {
 	OutputFormat string `env:"OUTPUT_FORMAT"`
 	OutputFile   string `env:"OUTPUT_FILE"`
 	Debug        bool   `env:"DEBUG"`
+	Threads      int    `env:"THREADS"`
 }
 
 func GetConfig() Config {
