@@ -43,7 +43,7 @@ func NmapTcpAll() PortScan {
 				}
 			}()
 
-			cmd := exec.Command("nmap", target, "-sC", "-sV", "-p"+config.GetConfig().PortRange)
+			cmd := exec.Command("nmap", target, "-sC", "-sV", "-p"+config.GetConfig().PortRange, "-vvvv")
 			cmd.Stdout = writer
 			_ = cmd.Start()
 			go func() {

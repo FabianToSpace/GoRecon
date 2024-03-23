@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"gorecon/config"
+	"gorecon/logger"
 	"gorecon/plugins"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 		plugins.NmapUdpTop(),
 		plugins.NmapTcpAll(),
 	}
-
+	serviceResults := make([]plugins.Service, 0)
 	scanThreads := min(threads, len(scanners))
 
 	sem := make(chan struct{}, scanThreads)
@@ -25,8 +26,15 @@ func main() {
 		sem <- struct{}{}
 		go func(s plugins.PortScan) {
 			defer func() { <-sem }()
-			services := s.Run(ip)
-			fmt.Println(services)
+			done := make(chan []plugins.Service)
+			go func() {
+				logger.Logger().Start(s.Name, ip, "Starting "+s.Name)
+				services := s.Run(ip)
+				done <- services
+			}()
+			services := <-done
+			logger.Logger().Done(s.Name, ip, "Done, found "+strconv.Itoa(len(services))+" services")
+			serviceResults = append(serviceResults, services...)
 		}(scanner)
 	}
 
@@ -35,4 +43,6 @@ func main() {
 	}
 
 	close(sem)
+
+	logger.Logger().Done("Portscan", ip, "Found "+strconv.Itoa(len(serviceResults))+" services")
 }

@@ -43,7 +43,7 @@ func NmapTcpTop() PortScan {
 				}
 			}()
 
-			cmd := exec.Command("nmap", target, "-sC", "-sV")
+			cmd := exec.Command("nmap", target, "-sC", "-sV", "-vvvv")
 			cmd.Stdout = writer
 			_ = cmd.Start()
 			go func() {
