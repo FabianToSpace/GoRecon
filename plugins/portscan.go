@@ -1,7 +1,5 @@
 package plugins
 
-type run func(string) []Service
-
 type PortScan struct {
 	Name        string   // Name of the Portscan
 	Description string   // Description of the Portscan

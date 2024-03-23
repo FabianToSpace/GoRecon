@@ -6,10 +6,15 @@ import (
 	"gorecon/plugins"
 	"os"
 	"strconv"
+	"time"
+)
+
+var (
+	Target = ""
 )
 
 func main() {
-	ip := os.Args[1]
+	Target = os.Args[1]
 
 	threads := config.GetConfig().Threads
 
@@ -19,21 +24,33 @@ func main() {
 		plugins.NmapTcpAll(),
 	}
 	serviceResults := make([]plugins.Service, 0)
+
 	scanThreads := min(threads, len(scanners))
+	logger.RunningTasks = len(scanners)
 
 	sem := make(chan struct{}, scanThreads)
+
+	ticker := make(chan struct{})
+	go StartTicker(ticker)
+
 	for _, scanner := range scanners {
 		sem <- struct{}{}
 		go func(s plugins.PortScan) {
 			defer func() { <-sem }()
 			done := make(chan []plugins.Service)
 			go func() {
-				logger.Logger().Start(s.Name, ip, "Starting "+s.Name)
-				services := s.Run(ip)
+				logger.Logger().Start(s.Name, Target, "Starting "+s.Name)
+				logger.ActiveTasks[s.Name] = true
+
+				services := s.Run(Target)
 				done <- services
 			}()
 			services := <-done
-			logger.Logger().Done(s.Name, ip, "Done, found "+strconv.Itoa(len(services))+" services")
+			logger.Logger().Done(s.Name, Target, "Done, found "+strconv.Itoa(len(services))+" services")
+
+			logger.RunningTasks -= 1
+			delete(logger.ActiveTasks, s.Name)
+
 			serviceResults = append(serviceResults, services...)
 		}(scanner)
 	}
@@ -43,6 +60,23 @@ func main() {
 	}
 
 	close(sem)
+	close(ticker)
 
-	logger.Logger().Done("Portscan", ip, "Found "+strconv.Itoa(len(serviceResults))+" services")
+	logger.Logger().Done("Portscan", Target, "Found "+strconv.Itoa(len(serviceResults))+" services")
+}
+
+func StartTicker(quit chan struct{}) {
+	ticker := time.NewTicker(10 * time.Second)
+
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				logger.Logger().Ticker(Target)
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 }

@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+type run func(string) []Service
+
 type Service struct {
 	Target   string
 	Protocol string
