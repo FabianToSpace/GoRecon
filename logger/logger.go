@@ -52,8 +52,9 @@ var (
 func Printer(symbol, logtype, module, target, message string, color string, condition bool) {
 	lock.Lock()
 	defer lock.Unlock()
-	module = EnsureLength(module, 20)
+	module = EnsureLength(module, 35)
 	logtype = EnsureLength(logtype, 5)
+	target = EnsureLength(target, 22)
 
 	if condition {
 		fmt.Printf(colors.Color("["+color+"][%s] %s | [magenta]%s | [green]%s[reset]\t%s\n"), symbol, logtype, target, module, message)
@@ -88,7 +89,7 @@ func Logger() ILogger {
 
 			now := time.Now().Format("15:04:05")
 			fmt.Printf(
-				colors.Color("[green][*] %s | [magenta]%s | [reset]Still running [yellow]%d[reset] Scan Tasks\n[yellow]%s[reset]\n"),
+				colors.Color("[green][*] %s | [magenta]%s | [reset]Still running [yellow]%d[reset] Tasks\n[yellow]%s[reset]\n"),
 				now, target, RunningTasks, strings.Join(running, ", "))
 		},
 	}

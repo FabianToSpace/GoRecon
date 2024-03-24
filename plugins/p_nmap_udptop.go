@@ -3,7 +3,6 @@ package plugins
 import (
 	"bufio"
 	"context"
-	"gorecon/config"
 	"gorecon/logger"
 	"io"
 	"os/exec"
@@ -32,9 +31,7 @@ func NmapUdpTop() PortScan {
 				for scanner.Scan() {
 					line := scanner.Text()
 
-					if config.GetConfig().Debug {
-						logger.Logger().Debug(moduleName, target, line)
-					}
+					logger.Logger().Debug(moduleName, target, line)
 
 					service := extractService(target, moduleName, line)
 					if service != (Service{}) {

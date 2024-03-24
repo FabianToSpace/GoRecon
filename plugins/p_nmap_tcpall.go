@@ -9,15 +9,15 @@ import (
 	"os/exec"
 )
 
-func NmapTcpTop() PortScan {
-	moduleName := "nmap-tcp-top"
+func NmapTcpAll() PortScan {
+	moduleName := "nmap-tcp-all"
 	return PortScan{
 		Name:        moduleName,
-		Description: "nmap TCP top",
+		Description: "nmap TCP all",
 		Type:        "tcp",
 		Tags:        []string{"default", "default-portscan"},
 		Run: func(target string) []Service {
-			logger.Logger().Info(moduleName, target, "Starting Nmap TCP top scan")
+			logger.Logger().Info(moduleName, target, "Starting Nmap TCP all scan")
 
 			services := make([]Service, 0)
 			reader, writer := io.Pipe()
@@ -32,9 +32,7 @@ func NmapTcpTop() PortScan {
 				for scanner.Scan() {
 					line := scanner.Text()
 
-					if config.GetConfig().Debug {
-						logger.Logger().Debug(moduleName, target, line)
-					}
+					logger.Logger().Debug(moduleName, target, line)
 
 					service := extractService(target, moduleName, line)
 					if service != (Service{}) {
@@ -43,7 +41,7 @@ func NmapTcpTop() PortScan {
 				}
 			}()
 
-			cmd := exec.Command("nmap", target, "-sC", "-sV", "-vvvv")
+			cmd := exec.Command("nmap", target, "-sC", "-sV", "-p"+config.GetConfig().PortRange, "-vvvv")
 			cmd.Stdout = writer
 			_ = cmd.Start()
 			go func() {

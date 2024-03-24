@@ -1,68 +1,130 @@
 package main
 
 import (
+	"fmt"
 	"gorecon/config"
 	"gorecon/logger"
 	"gorecon/plugins"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
 var (
-	Target = ""
-)
-
-func main() {
-	Target = os.Args[1]
-
-	threads := config.GetConfig().Threads
-
-	scanners := []plugins.PortScan{
+	Target       = ""
+	Threads      = 0
+	PortScanners = []plugins.PortScan{
 		plugins.NmapTcpTop(),
 		plugins.NmapUdpTop(),
 		plugins.NmapTcpAll(),
 	}
-	serviceResults := make([]plugins.Service, 0)
+	ServiceScanners = []plugins.ServiceScan{
+		plugins.Dirbuster(),
+		plugins.Whatweb(),
+	}
+	Services = make([]plugins.Service, 0)
+)
 
-	scanThreads := min(threads, len(scanners))
-	logger.RunningTasks = len(scanners)
+func main() {
+	Target = os.Args[1]
+	Threads = config.GetConfig().Threads
+	StartPortScanner()
+	StartServiceScanner()
+}
 
-	sem := make(chan struct{}, scanThreads)
+func StartPortScanner() {
+	threads := min(Threads, len(PortScanners))
+	logger.RunningTasks = len(PortScanners)
+
+	sem := make(chan struct{}, threads)
 
 	ticker := make(chan struct{})
 	go StartTicker(ticker)
 
-	for _, scanner := range scanners {
+	for _, scanner := range PortScanners {
 		sem <- struct{}{}
-		go func(s plugins.PortScan) {
-			defer func() { <-sem }()
-			done := make(chan []plugins.Service)
-			go func() {
-				logger.Logger().Start(s.Name, Target, "Starting "+s.Name)
-				logger.ActiveTasks[s.Name] = true
-
-				services := s.Run(Target)
-				done <- services
-			}()
-			services := <-done
-			logger.Logger().Done(s.Name, Target, "Done, found "+strconv.Itoa(len(services))+" services")
-
-			logger.RunningTasks -= 1
-			delete(logger.ActiveTasks, s.Name)
-
-			serviceResults = append(serviceResults, services...)
-		}(scanner)
+		go func() {
+			result := PortScannerRunner(scanner)
+			Services = append(Services, result...)
+			<-sem
+		}()
 	}
 
-	for i := 0; i < scanThreads; i++ {
+	for i := 0; i < threads; i++ {
 		sem <- struct{}{}
 	}
 
 	close(sem)
+	ticker <- struct{}{}
 	close(ticker)
+}
 
-	logger.Logger().Done("Portscan", Target, "Found "+strconv.Itoa(len(serviceResults))+" services")
+func StartServiceScanner() {
+	threads := min(Threads, len(ServiceScanners)*len(Services))
+	logger.RunningTasks = len(ServiceScanners) * len(Services)
+
+	sem := make(chan struct{}, threads)
+
+	ticker := make(chan struct{})
+	go StartTicker(ticker)
+
+	var wg sync.WaitGroup
+
+	for _, scanner := range ServiceScanners {
+		for _, service := range Services {
+			wg.Add(1)
+			sem <- struct{}{}
+			go func() {
+				go ServiceScannerRunner(scanner, service, &wg)
+				<-sem
+			}()
+		}
+	}
+	wg.Wait()
+	for i := 0; i < threads; i++ {
+		sem <- struct{}{}
+	}
+
+	close(sem)
+	ticker <- struct{}{}
+	close(ticker)
+}
+
+func PortScannerRunner(scanner plugins.PortScan) []plugins.Service {
+	done := make(chan []plugins.Service)
+	go func() {
+		logger.Logger().Start(scanner.Name, Target, "Starting "+scanner.Name)
+		logger.ActiveTasks[scanner.Name] = true
+
+		result := scanner.Run(Target)
+		done <- result
+	}()
+	services := <-done
+	logger.Logger().Done(scanner.Name, Target, "Done, found "+strconv.Itoa(len(services))+" services")
+
+	logger.RunningTasks -= 1
+	delete(logger.ActiveTasks, scanner.Name)
+
+	return services
+}
+
+func ServiceScannerRunner(scanner plugins.ServiceScan, service plugins.Service, wg *sync.WaitGroup) bool {
+	defer wg.Done()
+	taskname := fmt.Sprintf("%s-%s-%s-%d", scanner.Name, service.Name, service.Protocol, service.Port)
+	done := make(chan bool)
+	go func() {
+		logger.Logger().Start(taskname, Target, "Starting "+scanner.Name)
+		logger.ActiveTasks[taskname] = true
+
+		result := scanner.Run(service)
+		done <- result
+	}()
+
+	res := <-done
+	logger.RunningTasks -= 1
+	delete(logger.ActiveTasks, taskname)
+	return res
 }
 
 func StartTicker(quit chan struct{}) {
