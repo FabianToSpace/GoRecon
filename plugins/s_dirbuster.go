@@ -7,7 +7,7 @@ func Dirbuster() ServiceScan {
 		Description:   "Directory Buster",
 		Tags:          []string{"default", "http"},
 		Command:       "feroxbuster",
-		Arguments:     []string{"-u {{.TargetPos}}", "-v", "-k", "-q", "-r", "-e"},
+		Arguments:     []string{"-u", "{{.TargetPos}}", "-v", "-k", "-q", "-r", "-e"},
 		TargetFormat:  "{{.Scheme}}://{{.Target}}:{{.Port}}",
 		TargetInplace: true,
 		MatchPattern:  "^http",
