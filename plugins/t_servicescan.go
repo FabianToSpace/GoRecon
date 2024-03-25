@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -25,6 +26,19 @@ type ServiceScan struct {
 	TargetInplace bool
 	TargetFormat  string
 	MatchPattern  string
+	OutputFormat  string
+	OutFile       bool // If the command doesn't offer a default output parameter, we have to write it ourself
+}
+
+func (s ServiceScan) TokenizeOutput(service Service) string {
+	curDir, _ := os.Getwd()
+
+	outputString := strings.Replace(s.OutputFormat, "{{.Target}}", service.Target, -1)
+	outputString = strings.Replace(outputString, "{{.Port}}", fmt.Sprintf("%d", service.Port), -1)
+	outputString = strings.Replace(outputString, "{{.Protocol}}", service.Protocol, -1)
+
+	outputString = curDir + "/" + outputString
+	return outputString
 }
 
 func (s ServiceScan) MatchCondition(service Service) bool {
@@ -33,19 +47,40 @@ func (s ServiceScan) MatchCondition(service Service) bool {
 	return condition
 }
 
+func (s ServiceScan) ReplaceInArguments(token, value string) []string {
+	for i, arg := range s.Arguments {
+		s.Arguments[i] = strings.Replace(arg, token, value, -1)
+	}
+	return s.Arguments
+}
+
+func (s ServiceScan) EnsurePath(service Service) bool {
+	filePath := s.TokenizeOutput(service)
+	// Remove filename from filepath
+	filePath = filepath.Dir(filePath)
+	if err := os.MkdirAll(filePath, os.ModePerm); err != nil {
+		panic(err)
+	}
+	return true
+}
+
 func (s ServiceScan) TokenizeArguments(service Service) []string {
 	targetString := strings.Replace(s.TargetFormat, "{{.Target}}", service.Target, -1)
 	targetString = strings.Replace(targetString, "{{.Port}}", fmt.Sprintf("%d", service.Port), -1)
 	targetString = strings.Replace(targetString, "{{.Scheme}}", service.Scheme, -1)
 
+	if s.OutputFormat != "" {
+		outputString := s.TokenizeOutput(service)
+		s.ReplaceInArguments("{{.OutputFile}}", outputString)
+	}
+
 	if s.TargetInplace {
-		// Replace the string {{.TargetPos}} in any of the array elements of Arguments
-		for i, arg := range s.Arguments {
-			s.Arguments[i] = strings.Replace(arg, "{{.TargetPos}}", targetString, -1)
-		}
+
+		s.ReplaceInArguments("{{.TargetPos}}", targetString)
 
 		return s.Arguments
 	}
+
 	if s.TargetAppend {
 		s.Arguments = append(s.Arguments, targetString)
 	} else {
@@ -71,6 +106,20 @@ func (s ServiceScan) Run(service Service) bool {
 		go func() {
 			defer close(scannerStopped)
 
+			if s.OutFile {
+				filePath := s.TokenizeOutput(service)
+
+				outfile, err := os.Create(filePath)
+				if err != nil {
+					logger.Logger().Error(s.Name, service.Target, err.Error())
+				}
+				defer outfile.Close()
+
+				fileWriter := bufio.NewWriter(outfile)
+				fileWriter.ReadFrom(reader)
+				fileWriter.Flush()
+			}
+
 			scanner := bufio.NewScanner(reader)
 			for scanner.Scan() {
 				line := scanner.Text()
@@ -79,6 +128,8 @@ func (s ServiceScan) Run(service Service) bool {
 		}()
 
 		args := s.TokenizeArguments(service)
+
+		s.EnsurePath(service)
 
 		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
 
