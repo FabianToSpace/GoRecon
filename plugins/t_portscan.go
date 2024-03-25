@@ -54,7 +54,7 @@ func (p PortScan) Run(target string) []Service {
 
 	args := p.TokenizeArguments(target)
 
-	cmd := exec.Command(p.Command, args...)
+	cmd := exec.CommandContext(cmdCtx, p.Command, args...)
 	cmd.Stdout = writer
 	_ = cmd.Start()
 	go func() {
