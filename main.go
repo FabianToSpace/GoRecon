@@ -30,6 +30,19 @@ func main() {
 	Target = os.Args[1]
 	Threads = config.GetConfig().Threads
 	StartPortScanner()
+
+	uniqueServices := make(map[string]plugins.Service)
+	for _, service := range Services {
+		key := fmt.Sprintf("%s-%s-%d", service.Target, service.Protocol, service.Port)
+		if _, ok := uniqueServices[key]; !ok {
+			uniqueServices[key] = service
+		}
+	}
+	Services = make([]plugins.Service, 0)
+	for _, service := range uniqueServices {
+		Services = append(Services, service)
+	}
+
 	StartServiceScanner()
 }
 
