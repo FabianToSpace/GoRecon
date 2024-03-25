@@ -91,6 +91,10 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 
 func (s ServiceScan) Run(service Service) bool {
 	if s.MatchCondition(service) {
+		if !s.EnsurePath(service) {
+			return false
+		}
+
 		if !slices.Contains(config.AllowedCommands, s.Command) {
 			panic(fmt.Sprintf("Command %s is not allowed", s.Command))
 		}
@@ -128,8 +132,6 @@ func (s ServiceScan) Run(service Service) bool {
 		}()
 
 		args := s.TokenizeArguments(service)
-
-		s.EnsurePath(service)
 
 		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
 
