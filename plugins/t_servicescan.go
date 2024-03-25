@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gorecon/logger"
 	"io"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -25,7 +26,7 @@ type ServiceScan struct {
 }
 
 func (s ServiceScan) MatchCondition(service Service) bool {
-	condition, _ := regexp.MatchString(s.MatchPattern, s.Name)
+	condition, _ := regexp.MatchString(s.MatchPattern, service.Name)
 
 	return condition
 }
@@ -73,14 +74,21 @@ func (s ServiceScan) Run(service Service) bool {
 
 		args := s.TokenizeArguments(service)
 
-		cmd := exec.Command(s.Command, args...)
+		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
+
+		curdir, _ := os.Getwd()
+		cmd.Dir = curdir
 
 		cmd.Stdout = writer
 		cmd.Stderr = writer
-		_ = cmd.Start()
+
+		if err := cmd.Start(); err != nil {
+			logger.Logger().Error(s.Name, service.Target, err.Error())
+		}
+
 		go func() {
+			defer cmdDone()
 			_ = cmd.Wait()
-			cmdDone()
 			writer.Close()
 		}()
 		<-cmdCtx.Done()
