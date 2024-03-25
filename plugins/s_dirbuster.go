@@ -10,5 +10,6 @@ func Dirbuster() ServiceScan {
 		Arguments:     []string{"-u {{.TargetPos}}", "-v", "-k", "-q", "-r", "-e"},
 		TargetFormat:  "{{.Scheme}}://{{.Target}}:{{.Port}}",
 		TargetInplace: true,
+		MatchPattern:  "^http",
 	}
 }

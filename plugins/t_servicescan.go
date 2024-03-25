@@ -21,6 +21,13 @@ type ServiceScan struct {
 	TargetAppend  bool     // Append Target String to the end of the Command
 	TargetInplace bool
 	TargetFormat  string
+	MatchPattern  string
+}
+
+func (s ServiceScan) MatchCondition(service Service) bool {
+	condition, _ := regexp.MatchString(s.MatchPattern, s.Name)
+
+	return condition
 }
 
 func (s ServiceScan) TokenizeArguments(service Service) []string {
@@ -45,8 +52,7 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 }
 
 func (s ServiceScan) Run(service Service) bool {
-	match, _ := regexp.MatchString("^http", service.Name)
-	if match {
+	if s.MatchCondition(service) {
 		target := fmt.Sprintf("%s:%d", service.Target, service.Port)
 		logger.Logger().Start(s.Name, target, "Starting "+s.Description)
 
