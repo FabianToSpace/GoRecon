@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"gorecon/config"
 	"gorecon/logger"
 	"io"
 	"os"
 	"os/exec"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -54,6 +56,10 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 
 func (s ServiceScan) Run(service Service) bool {
 	if s.MatchCondition(service) {
+		if !slices.Contains(config.AllowedCommands, s.Command) {
+			panic(fmt.Sprintf("Command %s is not allowed", s.Command))
+		}
+
 		target := fmt.Sprintf("%s:%d", service.Target, service.Port)
 		logger.Logger().Start(s.Name, target, "Starting "+s.Description)
 
