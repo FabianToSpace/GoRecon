@@ -17,6 +17,12 @@ type Config struct {
 	Threads      int    `env:"THREADS"`
 }
 
+var (
+	AllowedCommands = []string{
+		"nmap", "dirb", "feroxbuster", "whatweb", "nikto",
+	}
+)
+
 func GetConfig() Config {
 	var c Config
 	f, err := os.Open("config.yaml")

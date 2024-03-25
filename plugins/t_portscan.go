@@ -3,9 +3,12 @@ package plugins
 import (
 	"bufio"
 	"context"
+	"fmt"
+	"gorecon/config"
 	"gorecon/logger"
 	"io"
 	"os/exec"
+	"slices"
 )
 
 type PortScan struct {
@@ -28,6 +31,10 @@ func (p PortScan) TokenizeArguments(target string) []string {
 }
 
 func (p PortScan) Run(target string) []Service {
+	if !slices.Contains(config.AllowedCommands, p.Command) {
+		panic(fmt.Sprintf("Command %s is not allowed", p.Command))
+	}
+
 	logger.Logger().Info(p.Name, target, "Starting"+p.Description)
 
 	services := make([]Service, 0)
@@ -54,7 +61,7 @@ func (p PortScan) Run(target string) []Service {
 
 	args := p.TokenizeArguments(target)
 
-	cmd := exec.Command(p.Command, args...)
+	cmd := exec.CommandContext(cmdCtx, p.Command, args...)
 	cmd.Stdout = writer
 	_ = cmd.Start()
 	go func() {

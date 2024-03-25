@@ -4,10 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"gorecon/config"
 	"gorecon/logger"
 	"io"
+	"os"
 	"os/exec"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -25,7 +28,7 @@ type ServiceScan struct {
 }
 
 func (s ServiceScan) MatchCondition(service Service) bool {
-	condition, _ := regexp.MatchString(s.MatchPattern, s.Name)
+	condition, _ := regexp.MatchString(s.MatchPattern, service.Name)
 
 	return condition
 }
@@ -53,6 +56,10 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 
 func (s ServiceScan) Run(service Service) bool {
 	if s.MatchCondition(service) {
+		if !slices.Contains(config.AllowedCommands, s.Command) {
+			panic(fmt.Sprintf("Command %s is not allowed", s.Command))
+		}
+
 		target := fmt.Sprintf("%s:%d", service.Target, service.Port)
 		logger.Logger().Start(s.Name, target, "Starting "+s.Description)
 
@@ -73,14 +80,21 @@ func (s ServiceScan) Run(service Service) bool {
 
 		args := s.TokenizeArguments(service)
 
-		cmd := exec.Command(s.Command, args...)
+		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
+
+		curdir, _ := os.Getwd()
+		cmd.Dir = curdir
 
 		cmd.Stdout = writer
 		cmd.Stderr = writer
-		_ = cmd.Start()
+
+		if err := cmd.Start(); err != nil {
+			logger.Logger().Error(s.Name, service.Target, err.Error())
+		}
+
 		go func() {
+			defer cmdDone()
 			_ = cmd.Wait()
-			cmdDone()
 			writer.Close()
 		}()
 		<-cmdCtx.Done()
