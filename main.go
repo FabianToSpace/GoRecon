@@ -22,6 +22,7 @@ var (
 	ServiceScanners = []plugins.ServiceScan{
 		plugins.Dirbuster(),
 		plugins.Whatweb(),
+		plugins.Nikto(),
 	}
 	Services = make([]plugins.Service, 0)
 )
