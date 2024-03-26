@@ -11,5 +11,7 @@ func Whatweb() ServiceScan {
 		TargetFormat: "{{.Scheme}}://{{.Target}}:{{.Port}}",
 		TargetAppend: true,
 		MatchPattern: "^http",
+		OutputFormat: "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
+		OutFile:      true,
 	}
 }

@@ -7,8 +7,10 @@ import (
 	"gorecon/config"
 	"gorecon/logger"
 	"io"
+	"os"
 	"os/exec"
 	"slices"
+	"strings"
 )
 
 type PortScan struct {
@@ -19,9 +21,29 @@ type PortScan struct {
 	Arguments    []string // Command Arguments to add
 	Command      string   // Executeable Command
 	TargetAppend bool     // Append Target String to the end of the Command
+	OutputFormat string
+}
+
+func (p PortScan) ReplaceInArguments(token, value string) []string {
+	for i, arg := range p.Arguments {
+		p.Arguments[i] = strings.Replace(arg, token, value, -1)
+	}
+	return p.Arguments
+}
+
+func (p PortScan) TokenizeOutput(target string) string {
+	curDir, _ := os.Getwd()
+	outputString := strings.Replace(p.OutputFormat, "{{.Target}}", target, -1)
+	outputString = curDir + "/" + outputString
+	return outputString
 }
 
 func (p PortScan) TokenizeArguments(target string) []string {
+	if p.OutputFormat != "" {
+		outputString := p.TokenizeOutput(target)
+		p.ReplaceInArguments("{{.OutputFile}}", outputString)
+	}
+
 	if p.TargetAppend {
 		p.Arguments = append(p.Arguments, target)
 	} else {
@@ -63,6 +85,8 @@ func (p PortScan) Run(target string) []Service {
 
 	cmd := exec.CommandContext(cmdCtx, p.Command, args...)
 	cmd.Stdout = writer
+	cmd.Stderr = writer
+
 	_ = cmd.Start()
 	go func() {
 		_ = cmd.Wait()

@@ -8,7 +8,8 @@ func NmapUdpTop() PortScan {
 		Type:         "udp",
 		Tags:         []string{"default", "default-portscan"},
 		Command:      "nmap",
-		Arguments:    []string{"-sU", "-A", "--top-ports 100"},
-		TargetAppend: false,
+		Arguments:    []string{"-sU", "-A", "--top-ports", "100", "-oN", "{{.OutputFile}}"},
+		TargetAppend: true,
+		OutputFormat: "results/{{.Target}}/Scans/" + moduleName + ".txt",
 	}
 }

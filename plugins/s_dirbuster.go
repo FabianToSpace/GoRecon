@@ -7,9 +7,10 @@ func Dirbuster() ServiceScan {
 		Description:   "Directory Buster",
 		Tags:          []string{"default", "http"},
 		Command:       "feroxbuster",
-		Arguments:     []string{"-u", "{{.TargetPos}}", "-v", "-k", "-q", "-r", "-e"},
+		Arguments:     []string{"-u", "{{.TargetPos}}", "-v", "-k", "-q", "-r", "-e", "-o", "{{.OutputFile}}"},
 		TargetFormat:  "{{.Scheme}}://{{.Target}}:{{.Port}}",
 		TargetInplace: true,
 		MatchPattern:  "^http",
+		OutputFormat:  "results/{{.Target}}/Scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
 	}
 }

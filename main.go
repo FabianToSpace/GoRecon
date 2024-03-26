@@ -29,6 +29,9 @@ var (
 func main() {
 	Target = os.Args[1]
 	Threads = config.GetConfig().Threads
+
+	CreatePaths()
+
 	StartPortScanner()
 
 	uniqueServices := make(map[string]plugins.Service)
@@ -44,6 +47,11 @@ func main() {
 	}
 
 	StartServiceScanner()
+}
+
+func CreatePaths() {
+	curDir, _ := os.Getwd()
+	os.MkdirAll(curDir+"/results/"+Target+"/scans", os.ModePerm)
 }
 
 func StartPortScanner() {
