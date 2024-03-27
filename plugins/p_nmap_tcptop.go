@@ -9,6 +9,6 @@ func NmapTcpTop() PortScan {
 		Tags:         []string{"default", "default-portscan"},
 		Command:      "nmap",
 		Arguments:    []string{"-sC", "-sV", "-vvvv", "-oN", "{{.OutputFile}}"},
-		OutputFormat: "results/{{.Target}}/Scans/" + moduleName + ".txt",
+		OutputFormat: "results/{{.Target}}/scans/" + moduleName + ".txt",
 	}
 }

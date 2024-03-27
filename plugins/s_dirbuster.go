@@ -11,6 +11,6 @@ func Dirbuster() ServiceScan {
 		TargetFormat:  "{{.Scheme}}://{{.Target}}:{{.Port}}",
 		TargetInplace: true,
 		MatchPattern:  "^http",
-		OutputFormat:  "results/{{.Target}}/Scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
+		OutputFormat:  "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
 	}
 }

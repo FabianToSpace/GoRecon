@@ -76,10 +76,10 @@ func Logger() ILogger {
 			Printer("X", "ERROR", module, target, message, "red", true)
 		},
 		Done: func(module, target, message string) {
-			Printer("+", "DONE", module, target, message, "green", config.GetConfig().Debug)
+			Printer("+", "DONE", module, target, message, "green", true)
 		},
 		Start: func(module, target, message string) {
-			Printer(">", "START", module, target, message, "green", config.GetConfig().Debug)
+			Printer(">", "START", module, target, message, "green", true)
 		},
 		Ticker: func(target string) {
 			running := make([]string, 0)

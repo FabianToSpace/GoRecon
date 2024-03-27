@@ -16,18 +16,19 @@ import (
 )
 
 type ServiceScan struct {
-	Name          string   // Name of the ServiceScan
-	Description   string   // Description of the ServiceScan
-	Type          string   // Type (e.g. TCP or UPD)
-	Tags          []string // ['default', 'default-portscan']
-	Arguments     []string // Command Arguments to add
-	Command       string   // Executeable Command
-	TargetAppend  bool     // Append Target String to the end of the Command
-	TargetInplace bool
-	TargetFormat  string
-	MatchPattern  string
-	OutputFormat  string
-	OutFile       bool // If the command doesn't offer a default output parameter, we have to write it ourself
+	Name             string   // Name of the ServiceScan
+	Description      string   // Description of the ServiceScan
+	Type             string   // Type (e.g. TCP or UPD)
+	Tags             []string // ['default', 'default-portscan']
+	Arguments        []string // Command Arguments to add
+	Command          string   // Executeable Command
+	TargetAppend     bool     // Append Target String to the end of the Command
+	TargetInplace    bool
+	TargetFormat     string
+	MatchPattern     string
+	OutputFormat     string
+	OutFile          bool // If the command doesn't offer a default output parameter, we have to write it ourself
+	ArgumentsInPlace bool
 }
 
 func (s ServiceScan) TokenizeOutput(service Service) string {
@@ -74,8 +75,12 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 		s.ReplaceInArguments("{{.OutputFile}}", outputString)
 	}
 
-	if s.TargetInplace {
+	if s.ArgumentsInPlace {
+		s.ReplaceInArguments("{{.Scheme}}", service.Scheme)
+		s.ReplaceInArguments("{{.Port}}", fmt.Sprintf("%d", service.Port))
+	}
 
+	if s.TargetInplace {
 		s.ReplaceInArguments("{{.TargetPos}}", targetString)
 
 		return s.Arguments
@@ -87,6 +92,21 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 		s.Arguments = append([]string{targetString}, s.Arguments...)
 	}
 	return s.Arguments
+}
+
+func (s ServiceScan) NormalizeArgs(args []string) []string {
+	normalizedArgs := make([]string, 0, len(args))
+
+	for _, arg := range args {
+		if strings.Contains(arg, " ") {
+			parts := strings.Split(arg, " ")
+			normalizedArgs = append(normalizedArgs, parts...)
+		} else {
+			normalizedArgs = append(normalizedArgs, arg)
+		}
+	}
+
+	return normalizedArgs
 }
 
 func (s ServiceScan) Run(service Service) bool {
@@ -132,6 +152,7 @@ func (s ServiceScan) Run(service Service) bool {
 		}()
 
 		args := s.TokenizeArguments(service)
+		args = s.NormalizeArgs(args)
 
 		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
 

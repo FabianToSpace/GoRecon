@@ -10,6 +10,6 @@ func NmapUdpTop() PortScan {
 		Command:      "nmap",
 		Arguments:    []string{"-sU", "-A", "--top-ports", "100", "-oN", "{{.OutputFile}}"},
 		TargetAppend: true,
-		OutputFormat: "results/{{.Target}}/Scans/" + moduleName + ".txt",
+		OutputFormat: "results/{{.Target}}/scans/" + moduleName + ".txt",
 	}
 }
