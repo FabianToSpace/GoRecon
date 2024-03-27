@@ -94,21 +94,6 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 	return s.Arguments
 }
 
-func (s ServiceScan) NormalizeArgs(args []string) []string {
-	normalizedArgs := make([]string, 0, len(args))
-
-	for _, arg := range args {
-		if strings.Contains(arg, " ") {
-			parts := strings.Split(arg, " ")
-			normalizedArgs = append(normalizedArgs, parts...)
-		} else {
-			normalizedArgs = append(normalizedArgs, arg)
-		}
-	}
-
-	return normalizedArgs
-}
-
 func (s ServiceScan) Run(service Service) bool {
 	if s.MatchCondition(service) {
 		if !s.EnsurePath(service) {
@@ -152,7 +137,6 @@ func (s ServiceScan) Run(service Service) bool {
 		}()
 
 		args := s.TokenizeArguments(service)
-		//args = s.NormalizeArgs(args)
 
 		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
 
