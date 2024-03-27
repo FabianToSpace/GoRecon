@@ -2,18 +2,19 @@
 
 package plugins
 
-func NmapFtp() ServiceScan {
-	moduleName := "nmap-ftp"
+func Enum4Linux() ServiceScan {
+	moduleName := "enum4linux"
 	return ServiceScan{
 		Name:             moduleName,
-		Description:      "Nmap FTP Scripts",
-		Tags:             []string{"default", "ftp"},
-		Command:          "nmap",
-		Arguments:        []string{"-sV", "-p{{.Port}}", "-oN", "{{.OutputFile}}", "--script", "banner,(ftp* or ssl*) and safe"},
+		Description:      "Enum4Linux Samba Enumeration",
+		Tags:             []string{"default", "smb"},
+		Command:          "enum4linux",
+		Arguments:        []string{"-a"},
 		ArgumentsInPlace: true,
 		TargetAppend:     true,
-		MatchPattern:     "^ftp",
+		MatchPattern:     "^(netbios-ssn|microsoft-ds)",
 		OutputFormat:     "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
 		TargetFormat:     "{{.Target}}",
+		OutFile:          true,
 	}
 }

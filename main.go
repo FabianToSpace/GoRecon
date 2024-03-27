@@ -24,6 +24,8 @@ var (
 		plugins.Whatweb(),
 		plugins.Nikto(),
 		plugins.NmapFtp(),
+		plugins.Enum4Linux(),
+		plugins.NmapSmb(),
 	}
 	Services = make([]plugins.Service, 0)
 )

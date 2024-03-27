@@ -120,7 +120,7 @@ func (s ServiceScan) Run(service Service) bool {
 		}
 
 		target := fmt.Sprintf("%s:%d", service.Target, service.Port)
-		logger.Logger().Start(s.Name, target, "Starting "+s.Description)
+		logger.Logger().Start(s.Name, target, "Starting "+s.Description+" at Port "+fmt.Sprintf("%d", service.Port))
 
 		reader, writer := io.Pipe()
 
@@ -152,7 +152,7 @@ func (s ServiceScan) Run(service Service) bool {
 		}()
 
 		args := s.TokenizeArguments(service)
-		args = s.NormalizeArgs(args)
+		//args = s.NormalizeArgs(args)
 
 		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
 

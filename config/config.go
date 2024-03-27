@@ -19,7 +19,7 @@ type Config struct {
 
 var (
 	AllowedCommands = []string{
-		"nmap", "dirb", "feroxbuster", "whatweb", "nikto",
+		"nmap", "dirb", "feroxbuster", "whatweb", "nikto", "enum4linux",
 	}
 )
 

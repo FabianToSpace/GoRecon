@@ -2,17 +2,17 @@
 
 package plugins
 
-func NmapFtp() ServiceScan {
-	moduleName := "nmap-ftp"
+func NmapSmb() ServiceScan {
+	moduleName := "nmap-smb"
 	return ServiceScan{
 		Name:             moduleName,
-		Description:      "Nmap FTP Scripts",
-		Tags:             []string{"default", "ftp"},
+		Description:      "Nmap SMB Scripts",
+		Tags:             []string{"default", "smb"},
 		Command:          "nmap",
-		Arguments:        []string{"-sV", "-p{{.Port}}", "-oN", "{{.OutputFile}}", "--script", "banner,(ftp* or ssl*) and safe"},
+		Arguments:        []string{"-sV", "-p{{.Port}}", "-oN", "{{.OutputFile}}", "--script", "smb-enum-* and safe"},
 		ArgumentsInPlace: true,
 		TargetAppend:     true,
-		MatchPattern:     "^ftp",
+		MatchPattern:     "^(netbios-ssn|microsoft-ds)",
 		OutputFormat:     "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
 		TargetFormat:     "{{.Target}}",
 	}
