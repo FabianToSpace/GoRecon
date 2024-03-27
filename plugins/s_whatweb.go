@@ -4,7 +4,7 @@ func Whatweb() ServiceScan {
 	moduleName := "whatweb"
 	return ServiceScan{
 		Name:         moduleName,
-		Description:  "Directory Buster",
+		Description:  "Whatweb",
 		Tags:         []string{"default", "http"},
 		Command:      "whatweb",
 		Arguments:    []string{"--color=never", "--no-errors", "-a 3", "-v"},

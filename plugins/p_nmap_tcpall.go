@@ -13,6 +13,6 @@ func NmapTcpAll() PortScan {
 		Tags:         []string{"default", "default-portscan"},
 		Command:      "nmap",
 		Arguments:    []string{"-sC", "-sV", "-p" + config.GetConfig().PortRange, "-vvvv", "-oN", "{{.OutputFile}}"},
-		OutputFormat: "results/{{.Target}}/Scans/" + moduleName + ".txt",
+		OutputFormat: "results/{{.Target}}/scans/" + moduleName + ".txt",
 	}
 }

@@ -23,6 +23,7 @@ var (
 		plugins.Dirbuster(),
 		plugins.Whatweb(),
 		plugins.Nikto(),
+		plugins.NmapFtp(),
 	}
 	Services = make([]plugins.Service, 0)
 )
@@ -117,7 +118,11 @@ func PortScannerRunner(scanner plugins.PortScan) []plugins.Service {
 	done := make(chan []plugins.Service)
 	go func() {
 		logger.Logger().Start(scanner.Name, Target, "Starting "+scanner.Name)
+
+		var mutex = &sync.Mutex{}
+		mutex.Lock()
 		logger.ActiveTasks[scanner.Name] = true
+		mutex.Unlock()
 
 		result := scanner.Run(Target)
 		done <- result
@@ -137,7 +142,11 @@ func ServiceScannerRunner(scanner plugins.ServiceScan, service plugins.Service, 
 	done := make(chan bool)
 	go func() {
 		logger.Logger().Start(taskname, Target, "Starting "+scanner.Name)
+
+		var mutex = &sync.Mutex{}
+		mutex.Lock()
 		logger.ActiveTasks[taskname] = true
+		mutex.Unlock()
 
 		result := scanner.Run(service)
 		done <- result
