@@ -48,6 +48,8 @@ func main() {
 		Services = append(Services, service)
 	}
 
+	WriteServicesReport()
+
 	StartServiceScanner()
 }
 
@@ -172,4 +174,20 @@ func StartTicker(quit chan struct{}) {
 			}
 		}
 	}()
+}
+
+func WriteServicesReport() {
+	filePath := "results/" + Target + "/services.txt"
+	if outfile, err := os.Create(filePath); err != nil {
+		panic(err)
+	} else {
+		defer outfile.Close()
+
+		for _, service := range Services {
+			serviceString := fmt.Sprintf(
+				"Servicename:\t %s\nPort:\t\t\t %d\nProtocol:\t\t %s\nVersion:\t\t %s\nScheme:\t\t\t %s\nSecure:\t\t\t %t\n\n",
+				service.Name, service.Port, service.Protocol, service.Version, service.Scheme, service.Secure)
+			outfile.WriteString(serviceString)
+		}
+	}
 }
