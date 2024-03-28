@@ -12,7 +12,7 @@ func NmapSmb() ServiceScan {
 		Arguments:        []string{"-sV", "-p{{.Port}}", "-oN", "{{.OutputFile}}", "--script", "smb-enum-* and safe"},
 		ArgumentsInPlace: true,
 		TargetAppend:     true,
-		MatchPattern:     "^(netbios-ssn|microsoft-ds)",
+		MatchPattern:     "^(netbios-ssn|microsoft-ds|ldap|smb)",
 		OutputFormat:     "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
 		TargetFormat:     "{{.Target}}",
 	}

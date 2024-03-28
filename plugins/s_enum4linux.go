@@ -12,7 +12,7 @@ func Enum4Linux() ServiceScan {
 		Arguments:        []string{"-a"},
 		ArgumentsInPlace: true,
 		TargetAppend:     true,
-		MatchPattern:     "^(netbios-ssn|microsoft-ds)",
+		MatchPattern:     "^(netbios-ssn|microsoft-ds|ldap|smb)",
 		OutputFormat:     "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
 		TargetFormat:     "{{.Target}}",
 		OutFile:          true,
