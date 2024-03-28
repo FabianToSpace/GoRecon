@@ -1,6 +1,5 @@
 *.exe
 *.yaml
-go.sum
 launch.json
 TODO
 results/**/*
