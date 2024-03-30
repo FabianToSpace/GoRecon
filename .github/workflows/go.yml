@@ -31,11 +31,12 @@ jobs:
         chart: true
         amend: true
       if: |
+        github.event_name != 'pull_request' &&
         github.event_name == 'push'  
       continue-on-error: true
-      
-    - name: Upload coverage to Codacy
-      uses: codacy/codacy-coverage-reporter-action@v1
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: coverage.html
+
+    # - name: Upload coverage to Codacy
+    #   uses: codacy/codacy-coverage-reporter-action@v1
+    #   with:
+    #     project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+    #     coverage-reports: coverage.html
