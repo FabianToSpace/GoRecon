@@ -22,10 +22,17 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./... -coverprofile=c.out
+      run: go test -v ./...
 
-    - name: Conver Report
-      run: go tool cover -html=c.out -o coverage.html
+    - name: Update coverage report
+      uses: ncruces/go-coverage-report@v0
+      with:
+        report: true
+        chart: true
+        amend: true
+      if: |
+        github.event_name == 'push'  
+  continue-on-error: true
 
     - name: Upload coverage to Codacy
       uses: codacy/codacy-coverage-reporter-action@v1
