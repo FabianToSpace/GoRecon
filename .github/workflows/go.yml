@@ -29,6 +29,14 @@ jobs:
 
     - name: Conver Report
       run: go tool cover -html=c.out -o ./coverage.html
+    
+    - name: List files in the repository
+      run: |
+        ls ${{ github.workspace }}
+
+    - name: List files
+      run: |
+        ls
 
     - name: Upload coverage to Codacy
       uses: codacy/codacy-coverage-reporter-action@v1
