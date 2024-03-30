@@ -32,8 +32,8 @@ jobs:
         amend: true
       if: |
         github.event_name == 'push'  
-  continue-on-error: true
-
+      continue-on-error: true
+      
     - name: Upload coverage to Codacy
       uses: codacy/codacy-coverage-reporter-action@v1
       with:
