@@ -91,6 +91,10 @@ func (l ILogger) Ticker(target string) {
 }
 
 func Logger(cfg *config.Config) ILogger {
+	if cfg == nil {
+		cfg = &config.Config{}
+	}
+
 	return ILogger{
 		Config: *cfg,
 	}

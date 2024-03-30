@@ -188,3 +188,20 @@ func capturePrintOutput(symbol, logtype, module, target, message, color string, 
 
 	return string(out)
 }
+
+func TestLogger(t *testing.T) {
+	nonNilConfig := &config.Config{Debug: true}
+	nilConfig := (*config.Config)(nil)
+
+	// Testing the function with a non-nil config
+	result := Logger(nonNilConfig)
+	if !result.Config.Debug {
+		t.Errorf("Expected log level to be 'debug', but got %t", result.Config.Debug)
+	}
+
+	// Testing the function with a nil config
+	result = Logger(nilConfig)
+	if result.Config.Debug {
+		t.Errorf("Expected default log level, but got %t", result.Config.Debug)
+	}
+}
