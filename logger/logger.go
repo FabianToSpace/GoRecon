@@ -10,27 +10,8 @@ import (
 	"github.com/mitchellh/colorstring"
 )
 
-var lock sync.Mutex
-
-type ILogger struct {
-	Debug  func(module, target, message string)
-	Info   func(module, target, message string)
-	Warn   func(module, target, message string)
-	Error  func(module, target, message string)
-	Done   func(module, target, message string)
-	Start  func(module, target, message string)
-	Ticker func(target string)
-	Config config.Config
-}
-
-func EnsureLength(name string, length int) string {
-	for len(name) < length {
-		name = name + " "
-	}
-	return name
-}
-
 var (
+	lock   sync.Mutex
 	colors = colorstring.Colorize{
 		Colors: map[string]string{
 			"black":   "1;30",
@@ -50,7 +31,18 @@ var (
 	ActiveTasks  = make(map[string]bool)
 )
 
-func Printer(symbol, logtype, module, target, message string, color string, condition bool) {
+type ILogger struct {
+	Config config.Config
+}
+
+func EnsureLength(name string, length int) string {
+	for len(name) < length {
+		name = name + " "
+	}
+	return name
+}
+
+func (l ILogger) Printer(symbol, logtype, module, target, message string, color string, condition bool) {
 	lock.Lock()
 	defer lock.Unlock()
 	module = EnsureLength(module, 35)
@@ -62,37 +54,44 @@ func Printer(symbol, logtype, module, target, message string, color string, cond
 	}
 }
 
+func (l ILogger) Debug(module, target, message string) {
+	l.Printer("", "DEBUG", module, target, message, "cyan", l.Config.Debug)
+}
+
+func (l ILogger) Info(module, target, message string) {
+	l.Printer("*", "INFO", module, target, message, "cyan", true)
+}
+
+func (l ILogger) Warn(module, target, message string) {
+	l.Printer("!", "WARN", module, target, message, "yellow", true)
+}
+
+func (l ILogger) Error(module, target, message string) {
+	l.Printer("X", "ERROR", module, target, message, "red", true)
+}
+
+func (l ILogger) Done(module, target, message string) {
+	l.Printer("+", "DONE", module, target, message, "green", true)
+}
+
+func (l ILogger) Start(module, target, message string) {
+	l.Printer(">", "START", module, target, message, "green", true)
+}
+
+func (l ILogger) Ticker(target string) {
+	running := make([]string, 0)
+	for k := range ActiveTasks {
+		running = append(running, k)
+	}
+
+	now := time.Now().Format("15:04:05")
+	fmt.Printf(
+		colors.Color("[green][*] %s | [magenta]%s | [reset]Still running [yellow]%d[reset] Tasks\n[yellow]%s[reset]\n"),
+		now, target, RunningTasks, strings.Join(running, ", "))
+}
+
 func Logger(cfg *config.Config) ILogger {
 	return ILogger{
 		Config: *cfg,
-		Debug: func(module, target, message string) {
-			Printer("", "DEBUG", module, target, message, "cyan", cfg.Debug)
-		},
-		Info: func(module, target, message string) {
-			Printer("*", "INFO", module, target, message, "cyan", true)
-		},
-		Warn: func(module, target, message string) {
-			Printer("!", "WARN", module, target, message, "yellow", true)
-		},
-		Error: func(module, target, message string) {
-			Printer("X", "ERROR", module, target, message, "red", true)
-		},
-		Done: func(module, target, message string) {
-			Printer("+", "DONE", module, target, message, "green", true)
-		},
-		Start: func(module, target, message string) {
-			Printer(">", "START", module, target, message, "green", true)
-		},
-		Ticker: func(target string) {
-			running := make([]string, 0)
-			for k := range ActiveTasks {
-				running = append(running, k)
-			}
-
-			now := time.Now().Format("15:04:05")
-			fmt.Printf(
-				colors.Color("[green][*] %s | [magenta]%s | [reset]Still running [yellow]%d[reset] Tasks\n[yellow]%s[reset]\n"),
-				now, target, RunningTasks, strings.Join(running, ", "))
-		},
 	}
 }

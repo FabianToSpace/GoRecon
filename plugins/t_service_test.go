@@ -18,13 +18,6 @@ func TestMain(m *testing.M) {
 
 	Logger = logger.ILogger{
 		Config: Config,
-		Debug:  func(module, target, message string) {},
-		Info:   func(module, target, message string) {},
-		Warn:   func(module, target, message string) {},
-		Error:  func(module, target, message string) {},
-		Done:   func(module, target, message string) {},
-		Start:  func(module, target, message string) {},
-		Ticker: func(target string) {},
 	}
 
 	os.Exit(m.Run())
