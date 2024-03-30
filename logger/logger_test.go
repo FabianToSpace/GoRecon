@@ -86,6 +86,7 @@ func TestPrinter_ConditionFalse(t *testing.T) {
 }
 
 func TestLoggerFuncs(t *testing.T) {
+	logger := ILogger{Config: config.Config{Debug: true}}
 	module := "TestModule"
 	target := "TestTarget"
 	message := "TestMessage"
@@ -135,7 +136,28 @@ func TestLoggerFuncs(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		out := capturePrintOutput(tc.symbol, tc.logtype, module, target, message, tc.color, tc.condition)
+		old := os.Stdout
+		r, w, _ := os.Pipe()
+		os.Stdout = w
+
+		switch tc.logtype {
+		case "DEBUG":
+			logger.Debug(module, target, message)
+		case "INFO":
+			logger.Info(module, target, message)
+		case "WARN":
+			logger.Warn(module, target, message)
+		case "ERROR":
+			logger.Error(module, target, message)
+		case "DONE":
+			logger.Done(module, target, message)
+		case "START":
+			logger.Start(module, target, message)
+		}
+		w.Close()
+		out, _ := io.ReadAll(r)
+		os.Stdout = old
+
 		if string(out) == "" {
 			t.Errorf("Unexpected output: got empty, want non-empty")
 		}
