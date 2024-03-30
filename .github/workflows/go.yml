@@ -32,11 +32,11 @@ jobs:
     
     - name: List files in the repository
       run: |
-        ls ${{ github.workspace }}
+        ls ${{ github.workspace }} -al
 
     - name: List files
       run: |
-        ls
+        cat coverage.html
 
     - name: Upload coverage to Codacy
       uses: codacy/codacy-coverage-reporter-action@v1
