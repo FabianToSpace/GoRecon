@@ -1,9 +1,5 @@
 package plugins
 
-import (
-	"gorecon/config"
-)
-
 func NmapTcpAll() PortScan {
 	moduleName := "nmap-tcp-all"
 	return PortScan{
@@ -12,7 +8,7 @@ func NmapTcpAll() PortScan {
 		Type:         "tcp",
 		Tags:         []string{"default", "default-portscan"},
 		Command:      "nmap",
-		Arguments:    []string{"-sC", "-sV", "-p" + config.GetConfig().PortRange, "-vvvv", "-oN", "{{.OutputFile}}"},
+		Arguments:    []string{"-sC", "-sV", "-p{{.PortRange}}", "-vvvv", "-oN", "{{.OutputFile}}"},
 		OutputFormat: "results/{{.Target}}/scans/" + moduleName + ".txt",
 	}
 }

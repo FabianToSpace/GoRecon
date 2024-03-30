@@ -12,6 +12,8 @@ import (
 )
 
 var (
+	Config       = config.Config{}
+	Logger       = logger.ILogger{}
 	Target       = ""
 	Threads      = 0
 	PortScanners = []plugins.PortScan{
@@ -32,9 +34,19 @@ var (
 
 func main() {
 	Target = os.Args[1]
-	Threads = config.GetConfig().Threads
 
-	CreatePaths()
+	Config, err := config.GetConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	Logger = logger.Logger(&Config)
+
+	Threads = Config.Threads
+
+	if err := CreatePaths(); err != nil {
+		panic(err)
+	}
 
 	StartPortScanner()
 
@@ -55,9 +67,13 @@ func main() {
 	StartServiceScanner()
 }
 
-func CreatePaths() {
+func CreatePaths() error {
 	curDir, _ := os.Getwd()
-	os.MkdirAll(curDir+"/results/"+Target+"/scans", os.ModePerm)
+	if err := os.MkdirAll(curDir+"/results/"+Target+"/scans", os.ModePerm); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func StartPortScanner() {
@@ -121,7 +137,7 @@ func StartServiceScanner() {
 func PortScannerRunner(scanner plugins.PortScan) []plugins.Service {
 	done := make(chan []plugins.Service)
 	go func() {
-		logger.Logger().Start(scanner.Name, Target, "Starting "+scanner.Name)
+		Logger.Start(scanner.Name, Target, "Starting "+scanner.Name)
 
 		var mutex = &sync.Mutex{}
 		mutex.Lock()
@@ -132,7 +148,7 @@ func PortScannerRunner(scanner plugins.PortScan) []plugins.Service {
 		done <- result
 	}()
 	services := <-done
-	logger.Logger().Done(scanner.Name, Target, "Done, found "+strconv.Itoa(len(services))+" services")
+	Logger.Done(scanner.Name, Target, "Done, found "+strconv.Itoa(len(services))+" services")
 
 	logger.RunningTasks -= 1
 	delete(logger.ActiveTasks, scanner.Name)
@@ -145,7 +161,7 @@ func ServiceScannerRunner(scanner plugins.ServiceScan, service plugins.Service, 
 	taskname := fmt.Sprintf("%s-%s-%s-%d", scanner.Name, service.Name, service.Protocol, service.Port)
 	done := make(chan bool)
 	go func() {
-		logger.Logger().Start(taskname, Target, "Starting "+scanner.Name)
+		Logger.Start(taskname, Target, "Starting "+scanner.Name)
 
 		var mutex = &sync.Mutex{}
 		mutex.Lock()
@@ -169,7 +185,7 @@ func StartTicker(quit chan struct{}) {
 		for {
 			select {
 			case <-ticker.C:
-				logger.Logger().Ticker(Target)
+				Logger.Ticker(Target)
 			case <-quit:
 				ticker.Stop()
 				return
