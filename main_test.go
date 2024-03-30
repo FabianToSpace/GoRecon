@@ -74,6 +74,5 @@ func TestCreatePathsError(t *testing.T) {
 	}
 
 	// Clean up test environment
-	os.Chmod("results", 0o755)
 	os.Chdir(oldDir)
 }

@@ -16,7 +16,7 @@ func TestGetConfig(t *testing.T) {
 outputformat: test
 outputfile: test.json
 debug: false
-threads: 1`), 0644)
+threads: 1`), 0600)
 
 		Config, err := GetConfig()
 		if err != nil {
