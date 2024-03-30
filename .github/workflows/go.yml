@@ -8,6 +8,29 @@ on:
 
 jobs:
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '>=1.22.1'
+    
+    - name: Test
+      run: go test -v ./... 
+      
+    - name: Coverage Profile
+      run: go test -v ./... -coverprofile=c.out
+
+    - name: Upload coverage to Codacy
+      uses: codacy/codacy-coverage-reporter-action@v1
+      with:
+        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        coverage-reports: c.out
+        force-coverage-parser: go
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -20,27 +43,3 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./... 
-      
-    - name: Coverage Profile
-      run: go test -v ./... -coverprofile=c.out
-
-    - name: Conver Report
-      run: go tool cover -html=c.out -o ./coverage.html
-    
-    - name: List files in the repository
-      run: |
-        ls ${{ github.workspace }} -al
-
-    - name: List files
-      run: |
-        cat coverage.html
-
-    - name: Upload coverage to Codacy
-      uses: codacy/codacy-coverage-reporter-action@v1
-      with:
-        project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        coverage-reports: c.out
-        force-coverage-parser: go
