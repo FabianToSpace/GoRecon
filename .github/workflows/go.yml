@@ -23,3 +23,20 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Update coverage report
+      uses: ncruces/go-coverage-report@v0
+      with:
+        report: true
+        chart: true
+        amend: true
+      if: |
+        github.event_name != 'pull_request' &&
+        github.event_name == 'push'  
+      continue-on-error: true
+
+    # - name: Upload coverage to Codacy
+    #   uses: codacy/codacy-coverage-reporter-action@v1
+    #   with:
+    #     project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+    #     coverage-reports: coverage.html
