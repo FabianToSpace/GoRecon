@@ -1,7 +1,6 @@
 package plugins
 
 import (
-	"gorecon/logger"
 	"regexp"
 	"strconv"
 	"strings"
@@ -31,7 +30,7 @@ func extractService(target, moduleName, line string) Service {
 			serviceName = serviceName[4:]
 		}
 
-		logger.Logger().Info(moduleName, target, "Found open port: "+portString)
+		Logger.Info(moduleName, target, "Found open port: "+portString)
 
 		scheme := serviceName
 		if secure {

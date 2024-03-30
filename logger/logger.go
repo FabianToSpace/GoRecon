@@ -20,6 +20,7 @@ type ILogger struct {
 	Done   func(module, target, message string)
 	Start  func(module, target, message string)
 	Ticker func(target string)
+	Config config.Config
 }
 
 func EnsureLength(name string, length int) string {
@@ -61,10 +62,11 @@ func Printer(symbol, logtype, module, target, message string, color string, cond
 	}
 }
 
-func Logger() ILogger {
+func Logger(cfg *config.Config) ILogger {
 	return ILogger{
+		Config: *cfg,
 		Debug: func(module, target, message string) {
-			Printer("", "DEBUG", module, target, message, "cyan", config.GetConfig().Debug)
+			Printer("", "DEBUG", module, target, message, "cyan", cfg.Debug)
 		},
 		Info: func(module, target, message string) {
 			Printer("*", "INFO", module, target, message, "cyan", true)

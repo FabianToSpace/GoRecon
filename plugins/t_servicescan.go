@@ -95,6 +95,10 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 }
 
 func (s ServiceScan) Run(service Service) bool {
+	Init()
+	Config, _ := config.GetConfig()
+	Logger = logger.Logger(&Config)
+
 	if s.MatchCondition(service) {
 		if !s.EnsurePath(service) {
 			return false
@@ -105,7 +109,7 @@ func (s ServiceScan) Run(service Service) bool {
 		}
 
 		target := fmt.Sprintf("%s:%d", service.Target, service.Port)
-		logger.Logger().Start(s.Name, target, "Starting "+s.Description+" at Port "+fmt.Sprintf("%d", service.Port))
+		Logger.Start(s.Name, target, "Starting "+s.Description+" at Port "+fmt.Sprintf("%d", service.Port))
 
 		reader, writer := io.Pipe()
 
@@ -120,7 +124,7 @@ func (s ServiceScan) Run(service Service) bool {
 
 				outfile, err := os.Create(filePath)
 				if err != nil {
-					logger.Logger().Error(s.Name, service.Target, err.Error())
+					Logger.Error(s.Name, service.Target, err.Error())
 				}
 				defer outfile.Close()
 
@@ -132,7 +136,7 @@ func (s ServiceScan) Run(service Service) bool {
 			scanner := bufio.NewScanner(reader)
 			for scanner.Scan() {
 				line := scanner.Text()
-				logger.Logger().Debug(s.Name, service.Target, line)
+				Logger.Debug(s.Name, service.Target, line)
 			}
 		}()
 
@@ -147,7 +151,7 @@ func (s ServiceScan) Run(service Service) bool {
 		cmd.Stderr = writer
 
 		if err := cmd.Start(); err != nil {
-			logger.Logger().Error(s.Name, service.Target, err.Error())
+			Logger.Error(s.Name, service.Target, err.Error())
 		}
 
 		go func() {
@@ -159,7 +163,7 @@ func (s ServiceScan) Run(service Service) bool {
 
 		<-scannerStopped
 
-		logger.Logger().Done(s.Name, service.Target, "Done")
+		Logger.Done(s.Name, service.Target, "Done")
 		return true
 	}
 	return false

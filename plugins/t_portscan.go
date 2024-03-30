@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"gorecon/config"
-	"gorecon/logger"
 	"io"
 	"os"
 	"os/exec"
@@ -14,14 +13,15 @@ import (
 )
 
 type PortScan struct {
-	Name         string   // Name of the Portscan
-	Description  string   // Description of the Portscan
-	Type         string   // Type (e.g. TCP or UPD)
-	Tags         []string // ['default', 'default-portscan']
-	Arguments    []string // Command Arguments to add
-	Command      string   // Executeable Command
-	TargetAppend bool     // Append Target String to the end of the Command
-	OutputFormat string
+	Name             string   // Name of the Portscan
+	Description      string   // Description of the Portscan
+	Type             string   // Type (e.g. TCP or UPD)
+	Tags             []string // ['default', 'default-portscan']
+	Arguments        []string // Command Arguments to add
+	Command          string   // Executeable Command
+	TargetAppend     bool     // Append Target String to the end of the Command
+	OutputFormat     string
+	ArgumentsInPlace bool
 }
 
 func (p PortScan) ReplaceInArguments(token, value string) []string {
@@ -44,6 +44,10 @@ func (p PortScan) TokenizeArguments(target string) []string {
 		p.ReplaceInArguments("{{.OutputFile}}", outputString)
 	}
 
+	if p.ArgumentsInPlace {
+		p.Arguments = p.ReplaceInArguments("{{.PortRange}}", Config.PortRange)
+	}
+
 	if p.TargetAppend {
 		p.Arguments = append(p.Arguments, target)
 	} else {
@@ -53,11 +57,12 @@ func (p PortScan) TokenizeArguments(target string) []string {
 }
 
 func (p PortScan) Run(target string) []Service {
+	Init()
 	if !slices.Contains(config.AllowedCommands, p.Command) {
 		panic(fmt.Sprintf("Command %s is not allowed", p.Command))
 	}
 
-	logger.Logger().Info(p.Name, target, "Starting"+p.Description)
+	Logger.Info(p.Name, target, "Starting"+p.Description)
 
 	services := make([]Service, 0)
 	reader, writer := io.Pipe()
@@ -72,7 +77,7 @@ func (p PortScan) Run(target string) []Service {
 		for scanner.Scan() {
 			line := scanner.Text()
 
-			logger.Logger().Debug(p.Name, target, line)
+			Logger.Debug(p.Name, target, line)
 
 			service := extractService(target, p.Name, line)
 			if service != (Service{}) {
