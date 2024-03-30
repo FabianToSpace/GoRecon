@@ -16,7 +16,7 @@ func TestGetConfig(t *testing.T) {
 outputformat: test
 outputfile: test.json
 debug: false
-threads: 1`), 0600)
+threads: 1`), 0400)
 
 		Config, err := GetConfig()
 		if err != nil {
@@ -80,7 +80,7 @@ debug: false
 outputformat: test
 outputfile: test.json
 debug: false
-threads: 1`), 0644)
+threads: 1`), 0400)
 
 		os.Setenv("PORT_RANGE", "5")
 		os.Setenv("OUTPUT_FORMAT", "env")
