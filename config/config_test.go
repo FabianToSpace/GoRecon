@@ -59,7 +59,7 @@ threads: 1`), 0400)
 	outputformat: test
 		outputfile: test.json
 debug: false
-	threads: 1`), 0644)
+	threads: 1`), 0400)
 
 		_, err := GetConfig()
 		if err == nil {
