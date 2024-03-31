@@ -220,63 +220,47 @@ func TestLogger(t *testing.T) {
 	}
 }
 
-func TestTickerNoRunningTasks(t *testing.T) {
+func TestTicker(t *testing.T) {
 	l := ILogger{}
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+	dt := func() time.Time { return time.Date(2024, 3, 30, 12, 0, 0, 0, time.UTC) }
+	dtFormatted := dt().Format("15:04:05")
 
-	l.Ticker("test_target")
-
-	w.Close()
-	out, _ := io.ReadAll(r)
-	os.Stdout = old
-
-	expected := "[green][*] <current_time> | [magenta]test_target | [reset]Still running [yellow]0[reset] Tasks\n[yellow][reset]\n"
-	got := string(out)
-	if got != expected {
-		t.Errorf("Unexpected output, got: %s, want: %s", got, expected)
+	testCases := []struct {
+		tasks    map[string]bool
+		running  int
+		expected string
+	}{
+		{
+			tasks:    make(map[string]bool),
+			running:  0,
+			expected: colors.Color("[green][*] " + dtFormatted + " | [magenta]test_target | [reset]Still running [yellow]0[reset] Tasks\n[yellow][reset]\n"),
+		},
+		{
+			tasks: map[string]bool{
+				"task1": true,
+			},
+			running:  1,
+			expected: colors.Color("[green][*] " + dtFormatted + " | [magenta]test_target | [reset]Still running [yellow]1[reset] Tasks\n[yellow]task1[reset]\n"),
+		},
 	}
-}
 
-func TestTickerWithRunningTasks(t *testing.T) {
-	l := ILogger{}
-	ActiveTasks["task1"] = true
-	ActiveTasks["task2"] = true
+	for _, tc := range testCases {
+		ActiveTasks = tc.tasks
+		RunningTasks = tc.running
 
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+		old := os.Stdout
+		r, w, _ := os.Pipe()
+		os.Stdout = w
 
-	l.Ticker("test_target")
+		l.Ticker("test_target", dt)
 
-	w.Close()
-	out, _ := io.ReadAll(r)
-	os.Stdout = old
+		w.Close()
+		out, _ := io.ReadAll(r)
+		os.Stdout = old
 
-	expected := "[green][*] <current_time> | [magenta]test_target | [reset]Still running [yellow]2[reset] Tasks\n[yellow]task1, task2[reset]\n"
-	got := string(out)
-	if got != expected {
-		t.Errorf("Unexpected output, got: %s, want: %s", got, expected)
-	}
-}
-
-func TestTickerOutputFormatAndContent(t *testing.T) {
-	l := ILogger{}
-
-	old := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	l.Ticker("test_target")
-
-	w.Close()
-	out, _ := io.ReadAll(r)
-	os.Stdout = old
-
-	expected := "<expected_output>"
-	got := string(out)
-	if got != expected {
-		t.Errorf("Unexpected output, got: %s, want: %s", got, expected)
+		got := string(out)
+		if got != tc.expected {
+			t.Errorf("Unexpected output, got: %s, want: %s", got, tc.expected)
+		}
 	}
 }
