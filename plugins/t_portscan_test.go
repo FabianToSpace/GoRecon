@@ -44,3 +44,56 @@ func TestTokenizeOutput(t *testing.T) {
 
 	os.Chdir(curDir)
 }
+
+func TestTokenizeArguments(t *testing.T) {
+	testCases := []struct {
+		p        PortScan
+		expected []string
+		target   string
+	}{
+		{
+			p: PortScan{
+				Arguments:    []string{"token1", "token2", "token3"},
+				TargetAppend: false,
+			},
+			expected: []string{"example.com", "token1", "token2", "token3"},
+			target:   "example.com",
+		},
+		{
+			p: PortScan{
+				Arguments:    []string{"token1", "token2", "token3"},
+				TargetAppend: true,
+			},
+			expected: []string{"token1", "token2", "token3", "example.com"},
+			target:   "example.com",
+		},
+		{
+			p: PortScan{
+				Arguments:        []string{"token1", "token2", "token3", "{{.PortRange}}"},
+				ArgumentsInPlace: true,
+			},
+			expected: []string{"example.com", "token1", "token2", "token3", "1-65535"},
+			target:   "example.com",
+		},
+		{
+			p: PortScan{
+				Arguments:    []string{"token1", "token2", "token3", "{{.OutputFile}}"},
+				OutputFormat: "output_{{.Target}}.txt",
+			},
+			expected: []string{"example.com", "token1", "token2", "token3", "/tmp/output_example.com.txt"},
+			target:   "example.com",
+		},
+	}
+
+	curDir, _ := os.Getwd()
+	os.Chdir("/tmp")
+
+	for _, tc := range testCases {
+		result := tc.p.TokenizeArguments(tc.target)
+		if !reflect.DeepEqual(result, tc.expected) {
+			t.Errorf("Expected %v, but got %v", tc.expected, result)
+		}
+	}
+
+	os.Chdir(curDir)
+}
