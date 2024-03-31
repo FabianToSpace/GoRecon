@@ -168,7 +168,7 @@ func ServiceScannerRunner(scanner plugins.ServiceScan, service plugins.Service, 
 		logger.ActiveTasks[taskname] = true
 		mutex.Unlock()
 
-		result := scanner.Run(service)
+		result, _ := scanner.Run(service)
 		done <- result
 	}()
 

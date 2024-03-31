@@ -55,14 +55,14 @@ func (s ServiceScan) ReplaceInArguments(token, value string) []string {
 	return s.Arguments
 }
 
-func (s ServiceScan) EnsurePath(service Service) bool {
+func (s ServiceScan) EnsurePath(service Service) (bool, error) {
 	filePath := s.TokenizeOutput(service)
 	// Remove filename from filepath
 	filePath = filepath.Dir(filePath)
 	if err := os.MkdirAll(filePath, os.ModePerm); err != nil {
-		panic(err)
+		return false, err
 	}
-	return true
+	return true, nil
 }
 
 func (s ServiceScan) TokenizeArguments(service Service) []string {
@@ -94,14 +94,15 @@ func (s ServiceScan) TokenizeArguments(service Service) []string {
 	return s.Arguments
 }
 
-func (s ServiceScan) Run(service Service) bool {
+func (s ServiceScan) Run(service Service) (bool, error) {
 	Init()
 	Config, _ := config.GetConfig()
 	Logger = logger.Logger(&Config)
 
 	if s.MatchCondition(service) {
-		if !s.EnsurePath(service) {
-			return false
+		result, err := s.EnsurePath(service)
+		if err != nil || !result {
+			return false, err
 		}
 
 		if !slices.Contains(config.AllowedCommands, s.Command) {
@@ -164,7 +165,7 @@ func (s ServiceScan) Run(service Service) bool {
 		<-scannerStopped
 
 		Logger.Done(s.Name, service.Target, "Done")
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 }
