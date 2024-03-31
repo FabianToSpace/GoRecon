@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"gorecon/config"
 	"os"
 	"reflect"
 	"testing"
@@ -21,14 +22,15 @@ func TestReplaceInArguments(t *testing.T) {
 
 func TestTokenizeOutput(t *testing.T) {
 	curDir, _ := os.Getwd()
+	tmpDir, _ := os.MkdirTemp("", "test")
 
 	p := PortScan{}
 	p.OutputFormat = "output_{{.Target}}.txt"
-	os.Chdir("/tmp")
+	os.Chdir(tmpDir)
 
 	// Test when target is "example.com"
 	target := "example.com"
-	expected := "/tmp/output_example.com.txt"
+	expected := tmpDir + "/output_example.com.txt"
 	result := p.TokenizeOutput(target)
 	if result != expected {
 		t.Errorf("Expected %s, but got %s", expected, result)
@@ -36,16 +38,22 @@ func TestTokenizeOutput(t *testing.T) {
 
 	// Test when target is "localhost"
 	target = "localhost"
-	expected = "/tmp/output_localhost.txt"
+	expected = tmpDir + "/output_localhost.txt"
 	result = p.TokenizeOutput(target)
 	if result != expected {
 		t.Errorf("Expected %s, but got %s", expected, result)
 	}
 
 	os.Chdir(curDir)
+	os.RemoveAll(tmpDir)
 }
 
 func TestTokenizeArguments(t *testing.T) {
+	curDir, _ := os.Getwd()
+	tmpDir, _ := os.MkdirTemp("", "test")
+	os.Chdir(tmpDir)
+
+	Config = config.Config{PortRange: "1-65535"}
 	testCases := []struct {
 		p        PortScan
 		expected []string
@@ -80,13 +88,10 @@ func TestTokenizeArguments(t *testing.T) {
 				Arguments:    []string{"token1", "token2", "token3", "{{.OutputFile}}"},
 				OutputFormat: "output_{{.Target}}.txt",
 			},
-			expected: []string{"example.com", "token1", "token2", "token3", "/tmp/output_example.com.txt"},
+			expected: []string{"example.com", "token1", "token2", "token3", tmpDir + "/output_example.com.txt"},
 			target:   "example.com",
 		},
 	}
-
-	curDir, _ := os.Getwd()
-	os.Chdir("/tmp")
 
 	for _, tc := range testCases {
 		result := tc.p.TokenizeArguments(tc.target)
@@ -96,4 +101,5 @@ func TestTokenizeArguments(t *testing.T) {
 	}
 
 	os.Chdir(curDir)
+	os.RemoveAll(tmpDir)
 }

@@ -100,12 +100,25 @@ func TestEnsurePath(t *testing.T) {
 		t.Error("Expected true, got false")
 	}
 
+	os.Chdir(curDir)
+	os.RemoveAll(tmpDir)
+}
+
+func TestEnsurePathError(t *testing.T) {
+	curDir, _ := os.Getwd()
+	tmpDir, _ := os.MkdirTemp("", "test")
+	os.Chdir("tmpDir")
+
+	s := ServiceScan{OutputFormat: "{{.Target}}/output.txt"}
+
 	// make tmpDir write protected
-	os.Chmod(tmpDir, 0o444)
-	service = Service{Target: "example2.com"}
-	result, err = s.EnsurePath(service)
+	os.Chmod(tmpDir, 0000)
+	service := Service{Target: "example2.com"}
+	result, err := s.EnsurePath(service)
 	if result || err == nil {
 		t.Error("Expected false, got true")
+		t.Errorf("Error: %v", err)
+		t.Errorf("Result: %v", result)
 	}
 
 	os.Chdir(curDir)

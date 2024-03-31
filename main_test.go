@@ -49,7 +49,7 @@ func TestCreatePathsError(t *testing.T) {
 	// Set up test environment
 	oldDir, _ := os.Getwd()
 	testDir, _ := os.MkdirTemp("", "test")
-	defer os.RemoveAll(testDir)
+
 	os.Chdir(testDir)
 	os.Mkdir("results", os.ModePerm)
 
@@ -68,4 +68,5 @@ func TestCreatePathsError(t *testing.T) {
 
 	// Clean up test environment
 	os.Chdir(oldDir)
+	os.RemoveAll(testDir)
 }
