@@ -42,6 +42,14 @@ func EnsureLength(name string, length int) string {
 	return name
 }
 
+func TimeNow(now func() time.Time) time.Time {
+	if now == nil {
+		now = time.Now
+	}
+
+	return now()
+}
+
 func (l ILogger) Printer(symbol, logtype, module, target, message string, color string, condition bool) {
 	lock.Lock()
 	defer lock.Unlock()
@@ -78,13 +86,17 @@ func (l ILogger) Start(module, target, message string) {
 	l.Printer(">", "START", module, target, message, "green", true)
 }
 
-func (l ILogger) Ticker(target string) {
+func (l ILogger) Ticker(target string, t func() time.Time) {
 	running := make([]string, 0)
 	for k := range ActiveTasks {
 		running = append(running, k)
 	}
 
-	now := time.Now().Format("15:04:05")
+	if t == nil {
+		t = time.Now
+	}
+
+	now := TimeNow(t).Format("15:04:05")
 	fmt.Printf(
 		colors.Color("[green][*] %s | [magenta]%s | [reset]Still running [yellow]%d[reset] Tasks\n[yellow]%s[reset]\n"),
 		now, target, RunningTasks, strings.Join(running, ", "))

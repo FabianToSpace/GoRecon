@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestEnsureLength_ValidCases(t *testing.T) {
@@ -44,6 +45,19 @@ func TestEnsureLength_ZeroLength(t *testing.T) {
 	result := EnsureLength(name, length)
 	if result != expected {
 		t.Errorf("EnsureLength(%q, %d) = %q; expected %q", name, length, result, expected)
+	}
+}
+
+func TestTimeNow(t *testing.T) {
+	setTime := time.Unix(1234567890, 0)
+	result := TimeNow(func() time.Time { return setTime })
+	if result != setTime {
+		t.Errorf("TimeNow() = %v; expected %v", result, setTime)
+	}
+
+	result = TimeNow(nil)
+	if result.IsZero() {
+		t.Errorf("TimeNow() = %v; expected non-zero", result)
 	}
 }
 
@@ -203,5 +217,66 @@ func TestLogger(t *testing.T) {
 	result = Logger(nilConfig)
 	if result.Config.Debug {
 		t.Errorf("Expected default log level, but got %t", result.Config.Debug)
+	}
+}
+
+func TestTickerNoRunningTasks(t *testing.T) {
+	l := ILogger{}
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	l.Ticker("test_target")
+
+	w.Close()
+	out, _ := io.ReadAll(r)
+	os.Stdout = old
+
+	expected := "[green][*] <current_time> | [magenta]test_target | [reset]Still running [yellow]0[reset] Tasks\n[yellow][reset]\n"
+	got := string(out)
+	if got != expected {
+		t.Errorf("Unexpected output, got: %s, want: %s", got, expected)
+	}
+}
+
+func TestTickerWithRunningTasks(t *testing.T) {
+	l := ILogger{}
+	ActiveTasks["task1"] = true
+	ActiveTasks["task2"] = true
+
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	l.Ticker("test_target")
+
+	w.Close()
+	out, _ := io.ReadAll(r)
+	os.Stdout = old
+
+	expected := "[green][*] <current_time> | [magenta]test_target | [reset]Still running [yellow]2[reset] Tasks\n[yellow]task1, task2[reset]\n"
+	got := string(out)
+	if got != expected {
+		t.Errorf("Unexpected output, got: %s, want: %s", got, expected)
+	}
+}
+
+func TestTickerOutputFormatAndContent(t *testing.T) {
+	l := ILogger{}
+
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	l.Ticker("test_target")
+
+	w.Close()
+	out, _ := io.ReadAll(r)
+	os.Stdout = old
+
+	expected := "<expected_output>"
+	got := string(out)
+	if got != expected {
+		t.Errorf("Unexpected output, got: %s, want: %s", got, expected)
 	}
 }

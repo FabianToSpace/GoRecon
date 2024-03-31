@@ -185,7 +185,7 @@ func StartTicker(quit chan struct{}) {
 		for {
 			select {
 			case <-ticker.C:
-				Logger.Ticker(Target)
+				Logger.Ticker(Target, nil)
 			case <-quit:
 				ticker.Stop()
 				return
