@@ -126,25 +126,65 @@ func TestEnsurePath(t *testing.T) {
 // }
 
 func TestServiceScanTokenizeArguments(t *testing.T) {
-	s := ServiceScan{
-		TargetFormat:     "http://{{.Target}}:{{.Port}}",
-		OutputFormat:     "output{{.Target}}.txt",
-		Arguments:        []string{},
-		ArgumentsInPlace: true,
-		TargetInplace:    false,
-		TargetAppend:     true,
+	testCases := []struct {
+		s        ServiceScan
+		expected []string
+		service  Service
+	}{
+		{
+			s: ServiceScan{
+				TargetFormat:     "http://{{.Target}}:{{.Port}}",
+				OutputFormat:     "output{{.Target}}.txt",
+				Arguments:        []string{"arg1", "arg2"},
+				ArgumentsInPlace: true,
+				TargetInplace:    false,
+				TargetAppend:     true,
+			},
+			expected: []string{"arg1", "arg2", "http://example.com:8080"},
+			service: Service{
+				Target: "example.com",
+				Port:   8080,
+				Scheme: "https",
+			},
+		},
+		{
+			s: ServiceScan{
+				TargetFormat:     "http://{{.Target}}:{{.Port}}",
+				OutputFormat:     "output{{.Target}}.txt",
+				Arguments:        []string{"arg1", "arg2"},
+				ArgumentsInPlace: true,
+				TargetInplace:    false,
+				TargetAppend:     false,
+			},
+			expected: []string{"http://example.com:8080", "arg1", "arg2"},
+			service: Service{
+				Target: "example.com",
+				Port:   8080,
+				Scheme: "https",
+			},
+		},
+		{
+			s: ServiceScan{
+				TargetFormat:     "http://{{.Target}}:{{.Port}}",
+				OutputFormat:     "output{{.Target}}.txt",
+				Arguments:        []string{"arg1", "{{.TargetPos}}", "arg2"},
+				ArgumentsInPlace: true,
+				TargetInplace:    true,
+				TargetAppend:     false,
+			},
+			expected: []string{"arg1", "http://example.com:8080", "arg2"},
+			service: Service{
+				Target: "example.com",
+				Port:   8080,
+				Scheme: "https",
+			},
+		},
 	}
 
-	service := Service{
-		Target: "example.com",
-		Port:   8080,
-		Scheme: "https",
-	}
-
-	expected := []string{"http://example.com:8080"}
-	result := s.TokenizeArguments(service)
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Errorf("Expected %v, but got %v", expected, result)
+	for _, tc := range testCases {
+		result := tc.s.TokenizeArguments(tc.service)
+		if !reflect.DeepEqual(result, tc.expected) {
+			t.Errorf("Expected %v, but got %v", tc.expected, result)
+		}
 	}
 }
