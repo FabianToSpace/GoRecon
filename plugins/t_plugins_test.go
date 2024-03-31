@@ -30,6 +30,14 @@ threads: 1`), 0400)
 	}
 	err = nil
 
+	Config = config.Config{PortRange: "1-65535"}
+	cfg, err = Init()
+	if cfg.PortRange != "1-65535" && err == nil {
+		t.Error("Config was not initialized with the expected values")
+	}
+	err = nil
+	Config = config.Config{}
+
 	// Force Error
 	os.Remove("config.yaml")
 	os.WriteFile("config.yaml", []byte(`portrange: 1
