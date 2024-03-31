@@ -46,6 +46,13 @@ func TestExtractService(t *testing.T) {
 			expected: Service{Target: "localhost", Protocol: "udp", Port: 456, Name: "domain", Secure: false, Version: "ISC BIND", Scheme: "domain"},
 		},
 		{
+			name:     "Valid FTP service",
+			target:   "example.com",
+			module:   "TestModule",
+			line:     "789/tcp    open  ssl/ftp    vsftpd 2.3.4",
+			expected: Service{Target: "example.com", Protocol: "tcp", Port: 789, Name: "ftp", Secure: true, Version: "vsftpd 2.3.4", Scheme: "sftp"},
+		},
+		{
 			name:     "Secure service",
 			target:   "example.com",
 			module:   "TestModule",
