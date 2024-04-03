@@ -20,7 +20,7 @@ debug: false
 threads: 1`), 0400)
 
 	cfg, err := Init()
-	if cfg == (config.Config{}) && err == nil {
+	if !cfg.Initialized && err == nil {
 		t.Error("Config was not initialized as expected")
 	}
 	err = nil
@@ -31,7 +31,7 @@ threads: 1`), 0400)
 	}
 	err = nil
 
-	Config = config.Config{PortRange: "1-65535"}
+	Config = config.Config{PortRange: "1-65535", Initialized: true}
 	cfg, err = Init()
 	if cfg.PortRange != "1-65535" && err == nil {
 		t.Error("Config was not initialized with the expected values")
@@ -55,4 +55,78 @@ debug: false
 
 	os.Chdir(curDir)
 	os.RemoveAll(tmpDir)
+}
+
+func TestLoadPortScanners(t *testing.T) {
+	// Test case where scanners match configured service scans
+	Config.Initialized = true
+	Config.Plugins.PortScans = []string{"nmap-tcp-all", "nmap-tcp-top"}
+	expectedScanners := []PortScan{NmapTcpAll(), NmapTcpTop()}
+
+	resultScanners := LoadPortScanners()
+
+	if len(expectedScanners) != len(resultScanners) {
+		t.Errorf("Expected %d scanners, but got %d", len(expectedScanners), len(resultScanners))
+	}
+
+	match := make(map[string]bool)
+
+	for _, expected := range expectedScanners {
+		for _, actual := range resultScanners {
+			if expected.Name == actual.Name {
+				match[expected.Name] = true
+			}
+		}
+	}
+
+	if len(match) != len(expectedScanners) {
+		t.Errorf("Expected %d scanners, but got %d", len(expectedScanners), len(match))
+	}
+
+	// Test case where no scanners match configured service scans
+	Config.Plugins.PortScans = []string{"NonExistentScanner"}
+	expectedNoMatch := 0
+
+	resultNoMatch := LoadPortScanners()
+
+	if expectedNoMatch != len(resultNoMatch) {
+		t.Errorf("Expected 0 scanners, but got %d", len(resultNoMatch))
+	}
+}
+
+func TestLoadServiceScanners(t *testing.T) {
+	// Test case where scanners match configured service scans
+	Config.Initialized = true
+	Config.Plugins.ServiceScans = []string{"dirbuster", "nmap-ftp"}
+	expectedScanners := []ServiceScan{Dirbuster(), NmapFtp()}
+
+	resultScanners := LoadServiceScanners()
+
+	if len(expectedScanners) != len(resultScanners) {
+		t.Errorf("Expected %d scanners, but got %d", len(expectedScanners), len(resultScanners))
+	}
+
+	match := make(map[string]bool)
+
+	for _, expected := range expectedScanners {
+		for _, actual := range resultScanners {
+			if expected.Name == actual.Name {
+				match[expected.Name] = true
+			}
+		}
+	}
+
+	if len(match) != len(expectedScanners) {
+		t.Errorf("Expected %d scanners, but got %d", len(expectedScanners), len(match))
+	}
+
+	// Test case where no scanners match configured service scans
+	Config.Plugins.ServiceScans = []string{"NonExistentScanner"}
+	expectedNoMatch := 0
+
+	resultNoMatch := LoadServiceScanners()
+
+	if expectedNoMatch != len(resultNoMatch) {
+		t.Errorf("Expected 0 scanners, but got %d", len(resultNoMatch))
+	}
 }

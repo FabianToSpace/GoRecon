@@ -14,6 +14,13 @@ type Config struct {
 	OutputFile   string `env:"OUTPUT_FILE"`
 	Debug        bool   `env:"DEBUG"`
 	Threads      int    `env:"THREADS"`
+	Plugins      Plugins
+	Initialized  bool
+}
+
+type Plugins struct {
+	PortScans    []string `env:"PORT_SCANS, delimiter=;"`
+	ServiceScans []string `env:"SERVICE_SCANS, delimiter=;"`
 }
 
 var (

@@ -16,7 +16,12 @@ func TestGetConfig(t *testing.T) {
 outputformat: test
 outputfile: test.json
 debug: false
-threads: 1`), 0400)
+threads: 1
+plugins:
+  portscans:
+    - nmap-tcp-all
+  servicescans:
+    - whatweb`), 0400)
 
 		Config, err := GetConfig()
 		if err != nil {
@@ -26,7 +31,9 @@ threads: 1`), 0400)
 			Config.OutputFormat != "test" ||
 			Config.OutputFile != "test.json" ||
 			Config.Debug != false ||
-			Config.Threads != 1 {
+			Config.Threads != 1 ||
+			len(Config.Plugins.PortScans) != 1 ||
+			len(Config.Plugins.ServiceScans) != 1 {
 			t.Errorf("Invalid config values")
 		}
 
@@ -87,6 +94,8 @@ threads: 1`), 0400)
 		os.Setenv("OUTPUT_FILE", "env.json")
 		os.Setenv("DEBUG", "true")
 		os.Setenv("THREADS", "5")
+		os.Setenv("PORT_SCANS", "nmap-tcp-all;nmap-tcp-top")
+		os.Setenv("SERVICE_SCANS", "whatweb;nikto")
 
 		Config, err := GetConfig()
 		if err != nil {
@@ -97,7 +106,9 @@ threads: 1`), 0400)
 			Config.OutputFormat != "env" ||
 			Config.OutputFile != "env.json" ||
 			Config.Debug != true ||
-			Config.Threads != 5 {
+			Config.Threads != 5 ||
+			len(Config.Plugins.PortScans) != 2 ||
+			len(Config.Plugins.ServiceScans) != 2 {
 			t.Errorf("Invalid config values")
 		}
 
