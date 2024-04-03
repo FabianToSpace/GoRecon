@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"gorecon/config"
-	"gorecon/logger"
 	"io"
 	"os"
 	"os/exec"
@@ -13,6 +11,9 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/FabianToSpace/GoRecon/config"
+	"github.com/FabianToSpace/GoRecon/logger"
 )
 
 type ServiceScan struct {

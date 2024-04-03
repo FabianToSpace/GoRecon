@@ -1,4 +1,4 @@
-module gorecon
+module github.com/FabianToSpace/GoRecon
 
 go 1.22.1
 

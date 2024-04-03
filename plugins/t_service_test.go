@@ -1,10 +1,11 @@
 package plugins
 
 import (
-	"gorecon/config"
-	"gorecon/logger"
 	"os"
 	"testing"
+
+	"github.com/FabianToSpace/GoRecon/config"
+	"github.com/FabianToSpace/GoRecon/logger"
 )
 
 func TestMain(m *testing.M) {

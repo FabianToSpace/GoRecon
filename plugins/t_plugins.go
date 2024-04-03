@@ -1,8 +1,8 @@
 package plugins
 
 import (
-	"gorecon/config"
-	"gorecon/logger"
+	"github.com/FabianToSpace/GoRecon/config"
+	"github.com/FabianToSpace/GoRecon/logger"
 )
 
 var (

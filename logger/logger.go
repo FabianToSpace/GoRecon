@@ -2,10 +2,11 @@ package logger
 
 import (
 	"fmt"
-	"gorecon/config"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/FabianToSpace/GoRecon/config"
 
 	"github.com/mitchellh/colorstring"
 )
