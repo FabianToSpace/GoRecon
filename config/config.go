@@ -33,7 +33,7 @@ func GetConfig() (Config, error) {
 	var c Config
 
 	// check if file exists
-	if _, err := os.Stat("config.yaml"); os.IsExist(err) {
+	if _, err := os.Stat("config.yaml"); err == nil {
 		f, err := os.Open("config.yaml")
 		if err != nil {
 			return c, err

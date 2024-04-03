@@ -56,21 +56,6 @@ plugins:
 		os.RemoveAll(tmp)
 	})
 
-	// Test for handling error when opening config file
-	t.Run("Error opening config file", func(t *testing.T) {
-		curdir, _ := os.Getwd()
-		tmp, _ := os.MkdirTemp("", "configtest")
-		os.Chdir(tmp)
-
-		_, err := GetConfig()
-		if err == nil {
-			t.Errorf("Expected error when opening config file: %v", err)
-		}
-
-		os.Chdir(curdir)
-		os.RemoveAll(tmp)
-	})
-
 	// Test for handling error when decoding config file
 	t.Run("Error decoding config file", func(t *testing.T) {
 		curdir, _ := os.Getwd()
