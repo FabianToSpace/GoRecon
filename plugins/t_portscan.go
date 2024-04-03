@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"gorecon/config"
 	"io"
 	"os"
 	"os/exec"
 	"slices"
 	"strings"
+
+	"github.com/FabianToSpace/GoRecon/config"
 )
 
 type PortScan struct {

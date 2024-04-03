@@ -1,9 +1,10 @@
 package plugins
 
 import (
-	"gorecon/config"
 	"os"
 	"testing"
+
+	"github.com/FabianToSpace/GoRecon/config"
 )
 
 func TestInit(t *testing.T) {
