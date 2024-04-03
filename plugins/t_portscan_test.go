@@ -1,10 +1,11 @@
 package plugins
 
 import (
-	"gorecon/config"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/FabianToSpace/GoRecon/config"
 )
 
 func TestReplaceInArguments(t *testing.T) {

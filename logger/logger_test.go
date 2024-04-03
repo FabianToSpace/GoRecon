@@ -2,11 +2,12 @@ package logger
 
 import (
 	"fmt"
-	"gorecon/config"
 	"io"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/FabianToSpace/GoRecon/config"
 )
 
 func TestEnsureLength_ValidCases(t *testing.T) {

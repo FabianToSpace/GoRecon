@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"gorecon/config"
-	"gorecon/logger"
-	"gorecon/plugins"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/FabianToSpace/GoRecon/config"
+	"github.com/FabianToSpace/GoRecon/logger"
+	"github.com/FabianToSpace/GoRecon/plugins"
 )
 
 var (
