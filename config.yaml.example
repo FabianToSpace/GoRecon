@@ -3,3 +3,15 @@ outputformat: json
 outputfile: recon.json
 debug: false
 threads: 10
+plugins:
+  portscans:
+    - nmap-tcp-all
+    - nmap-tcp-top
+    - nmap-udp-top
+  servicescans:
+    - whatweb
+    - dirbuster
+    - enum4linux
+    - nikto
+    - nmap-ftp
+    - nmap-smb
