@@ -38,7 +38,8 @@ func main() {
 
 	Config, err := config.GetConfig()
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	Logger = logger.Logger(&Config)
@@ -46,7 +47,8 @@ func main() {
 	Threads = Config.Threads
 
 	if err := CreatePaths(); err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	StartPortScanner()
