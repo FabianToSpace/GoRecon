@@ -9,11 +9,11 @@ import (
 )
 
 type Config struct {
-	PortRange    string `env:"PORT_RANGE"`
-	OutputFormat string `env:"OUTPUT_FORMAT"`
-	OutputFile   string `env:"OUTPUT_FILE"`
-	Debug        bool   `env:"DEBUG"`
-	Threads      int    `env:"THREADS"`
+	PortRange    string `env:"PORT_RANGE, default=1-65535"`
+	OutputFormat string `env:"OUTPUT_FORMAT, default=json"`
+	OutputFile   string `env:"OUTPUT_FILE, default=recon.json"`
+	Debug        bool   `env:"DEBUG, default=false"`
+	Threads      int    `env:"THREADS, default=10"`
 	Plugins      Plugins
 	Initialized  bool
 }
@@ -32,15 +32,18 @@ var (
 func GetConfig() (Config, error) {
 	var c Config
 
-	f, err := os.Open("config.yaml")
-	if err != nil {
-		return c, err
-	}
-	defer f.Close()
+	// check if file exists
+	if _, err := os.Stat("config.yaml"); os.IsExist(err) {
+		f, err := os.Open("config.yaml")
+		if err != nil {
+			return c, err
+		}
+		defer f.Close()
 
-	decoder := yaml.NewDecoder(f)
-	if err := decoder.Decode(&c); err != nil {
-		return c, err
+		decoder := yaml.NewDecoder(f)
+		if err := decoder.Decode(&c); err != nil {
+			return c, err
+		}
 	}
 
 	ctx := context.Background()

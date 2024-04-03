@@ -6,6 +6,21 @@ import (
 )
 
 func TestGetConfig(t *testing.T) {
+	// Config not existing
+	t.Run("Config not existing", func(t *testing.T) {
+		curdir, _ := os.Getwd()
+		tmp, _ := os.MkdirTemp("", "configtest")
+		os.Chdir(tmp)
+
+		_, err := GetConfig()
+		if err != nil {
+			t.Error("Expected no error when config file is not existing")
+		}
+
+		os.Chdir(curdir)
+		os.RemoveAll(tmp)
+	})
+
 	// Test for successful reading of config file
 	t.Run("Successful reading of config file", func(t *testing.T) {
 		curdir, _ := os.Getwd()
