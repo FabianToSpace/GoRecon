@@ -18,13 +18,6 @@ func TestMain(m *testing.M) {
 
 	Logger = logger.ILogger{
 		Config: Config,
-		Debug:  func(module, target, message string) {},
-		Info:   func(module, target, message string) {},
-		Warn:   func(module, target, message string) {},
-		Error:  func(module, target, message string) {},
-		Done:   func(module, target, message string) {},
-		Start:  func(module, target, message string) {},
-		Ticker: func(target string) {},
 	}
 
 	os.Exit(m.Run())
@@ -51,6 +44,13 @@ func TestExtractService(t *testing.T) {
 			module:   "TestModule",
 			line:     "456/udp    open  domain  ISC BIND",
 			expected: Service{Target: "localhost", Protocol: "udp", Port: 456, Name: "domain", Secure: false, Version: "ISC BIND", Scheme: "domain"},
+		},
+		{
+			name:     "Valid FTP service",
+			target:   "example.com",
+			module:   "TestModule",
+			line:     "789/tcp    open  ssl/ftp    vsftpd 2.3.4",
+			expected: Service{Target: "example.com", Protocol: "tcp", Port: 789, Name: "ftp", Secure: true, Version: "vsftpd 2.3.4", Scheme: "sftp"},
 		},
 		{
 			name:     "Secure service",

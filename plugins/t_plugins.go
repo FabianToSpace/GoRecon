@@ -10,12 +10,14 @@ var (
 	Logger logger.ILogger
 )
 
-func Init() {
+func Init() (config.Config, error) {
 	if Config == (config.Config{}) {
 		Config, err := config.GetConfig()
 		if err != nil {
-			panic(err)
+			return Config, err
 		}
 		Logger = logger.Logger(&Config)
+		return Config, nil
 	}
+	return Config, nil
 }

@@ -18,13 +18,6 @@ func TestMain(m *testing.M) {
 
 	Logger = logger.ILogger{
 		Config: Config,
-		Debug:  func(module, target, message string) {},
-		Info:   func(module, target, message string) {},
-		Warn:   func(module, target, message string) {},
-		Error:  func(module, target, message string) {},
-		Done:   func(module, target, message string) {},
-		Start:  func(module, target, message string) {},
-		Ticker: func(target string) {},
 	}
 
 	os.Exit(m.Run())
@@ -56,7 +49,7 @@ func TestCreatePathsError(t *testing.T) {
 	// Set up test environment
 	oldDir, _ := os.Getwd()
 	testDir, _ := os.MkdirTemp("", "test")
-	defer os.RemoveAll(testDir)
+
 	os.Chdir(testDir)
 	os.Mkdir("results", os.ModePerm)
 
@@ -75,4 +68,5 @@ func TestCreatePathsError(t *testing.T) {
 
 	// Clean up test environment
 	os.Chdir(oldDir)
+	os.RemoveAll(testDir)
 }

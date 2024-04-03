@@ -168,7 +168,7 @@ func ServiceScannerRunner(scanner plugins.ServiceScan, service plugins.Service, 
 		logger.ActiveTasks[taskname] = true
 		mutex.Unlock()
 
-		result := scanner.Run(service)
+		result, _ := scanner.Run(service)
 		done <- result
 	}()
 
@@ -185,7 +185,7 @@ func StartTicker(quit chan struct{}) {
 		for {
 			select {
 			case <-ticker.C:
-				Logger.Ticker(Target)
+				Logger.Ticker(Target, nil)
 			case <-quit:
 				ticker.Stop()
 				return
