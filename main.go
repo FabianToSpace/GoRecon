@@ -13,24 +13,13 @@ import (
 )
 
 var (
-	Config       = config.Config{}
-	Logger       = logger.ILogger{}
-	Target       = ""
-	Threads      = 0
-	PortScanners = []plugins.PortScan{
-		plugins.NmapTcpTop(),
-		plugins.NmapUdpTop(),
-		plugins.NmapTcpAll(),
-	}
-	ServiceScanners = []plugins.ServiceScan{
-		plugins.Dirbuster(),
-		plugins.Whatweb(),
-		plugins.Nikto(),
-		plugins.NmapFtp(),
-		plugins.Enum4Linux(),
-		plugins.NmapSmb(),
-	}
-	Services = make([]plugins.Service, 0)
+	Config          = config.Config{}
+	Logger          = logger.ILogger{}
+	Target          = ""
+	Threads         = 0
+	PortScanners    = []plugins.PortScan{}
+	ServiceScanners = []plugins.ServiceScan{}
+	Services        = make([]plugins.Service, 0)
 )
 
 func main() {
@@ -43,6 +32,9 @@ func main() {
 	}
 
 	Logger = logger.Logger(&Config)
+
+	PortScanners = plugins.LoadPortScanners()
+	ServiceScanners = plugins.LoadServiceScanners()
 
 	Threads = Config.Threads
 
