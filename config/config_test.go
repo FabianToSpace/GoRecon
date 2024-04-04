@@ -112,6 +112,8 @@ threads: 1`), 0400)
 			t.Errorf("Invalid config values")
 		}
 
+		resetEnv()
+
 		os.Chdir(curdir)
 		os.RemoveAll(tmp)
 	})
@@ -128,7 +130,9 @@ outputfile: test.json
 debug: false
 threads: 1`), 0400)
 
-		os.Setenv("SKIP_CONFIG_FILE", "true")
+		if err := os.Setenv("SKIP_CONFIG_FILE", "true"); err != nil {
+			t.Errorf("Error setting environment variable: %v", err)
+		}
 
 		Config, err := GetConfig()
 		if err != nil {
@@ -143,9 +147,23 @@ threads: 1`), 0400)
 			len(Config.Plugins.PortScans) != 0 ||
 			len(Config.Plugins.ServiceScans) != 0 {
 			t.Errorf("Invalid config values")
+			t.Errorf("Config: %v", Config)
 		}
+
+		resetEnv()
 
 		os.Chdir(curdir)
 		os.RemoveAll(tmp)
 	})
+}
+
+func resetEnv() {
+	os.Unsetenv("PORT_RANGE")
+	os.Unsetenv("OUTPUT_FORMAT")
+	os.Unsetenv("OUTPUT_FILE")
+	os.Unsetenv("DEBUG")
+	os.Unsetenv("THREADS")
+	os.Unsetenv("PORT_SCANS")
+	os.Unsetenv("SERVICE_SCANS")
+	os.Unsetenv("SKIP_CONFIG_FILE")
 }
