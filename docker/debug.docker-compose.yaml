@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  gorecon:
+    build:
+      context: ../
+      dockerfile: ./docker/debug.Dockerfile
+    container_name: gorecon.debug
+    entrypoint: /debug.sh
+    env_file:
+      - ./debug.env
+    ports:
+      - 40000:40000
+    volumes:
+      - ../:/app
+    security_opt: 
+      - "seccomp:unconfined"

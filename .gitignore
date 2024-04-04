@@ -1,5 +1,7 @@
 *.exe
-*.yaml
-launch.json
 TODO
 results/**/*
+*.ps1
+gorecon
+config.yaml
+*.env

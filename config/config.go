@@ -32,17 +32,25 @@ var (
 func GetConfig() (Config, error) {
 	var c Config
 
-	// check if file exists
-	if _, err := os.Stat("config.yaml"); err == nil {
-		f, err := os.Open("config.yaml")
-		if err != nil {
-			return c, err
-		}
-		defer f.Close()
+	skipConfigFile := false
 
-		decoder := yaml.NewDecoder(f)
-		if err := decoder.Decode(&c); err != nil {
-			return c, err
+	if os.Getenv("SKIP_CONFIG_FILE") == "true" {
+		skipConfigFile = true
+	}
+
+	// check if file exists
+	if !skipConfigFile {
+		if _, err := os.Stat("config.yaml"); err == nil {
+			f, err := os.Open("config.yaml")
+			if err != nil {
+				return c, err
+			}
+			defer f.Close()
+
+			decoder := yaml.NewDecoder(f)
+			if err := decoder.Decode(&c); err != nil {
+				return c, err
+			}
 		}
 	}
 

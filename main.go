@@ -27,7 +27,7 @@ func main() {
 
 	Config, err := config.GetConfig()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
@@ -39,7 +39,7 @@ func main() {
 	Threads = Config.Threads
 
 	if err := CreatePaths(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
