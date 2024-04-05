@@ -71,11 +71,11 @@ jobs:
         with:
           images: uptospace/gorecon
           tags: |
-            type=semver,enable=${{ github.ref_type == 'tag') }},pattern={{version}}
-            type=semver,enable=${{ github.ref_type == 'tag') }},pattern={{major}}.{{minor}}
-            type=semver,enable=${{ github.ref_type == 'tag') }},pattern={{major}}
-            type=sha,enable=${{ github.ref_type != 'tag') }},prefix={{branch}}-
-            type=raw,enable=${{ github.ref == 'refs/heads/main') }},value=latest,enable={{is_default_branch}}
+            type=semver,enable=${{ github.ref_type == 'tag' }},pattern={{version}}
+            type=semver,enable=${{ github.ref_type == 'tag' }},pattern={{major}}.{{minor}}
+            type=semver,enable=${{ github.ref_type == 'tag' }},pattern={{major}}
+            type=sha,enable=${{ github.ref_type != 'tag' }},prefix={{branch}}-
+            type=raw,enable=${{ github.ref == 'refs/heads/main' }},value=latest,enable={{is_default_branch}}
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
