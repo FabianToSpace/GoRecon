@@ -1,22 +1,11 @@
-FROM golang:alpine3.19
+FROM uptospace/gorecon
 
-ENV TARGET="localhost"
-ENV PORT_SCANS="nmap-tcp-top"
-ENV SERVICE_SCANS="whatweb"
-
-RUN apk add --no-cache git
-
-RUN apk add --update-cache \
-    nmap nmap-scripts \
+RUN apk upgrade --update-cache --available \
+    && apk add nmap nmap-scripts \
     && rm -rf /var/cache/apk/*
 
-WORKDIR /app
+RUN adduser -D gorecon && chown -R gorecon:gorecon /go/bin 
 
-COPY . .
-
-RUN go build -o GoRecon && chmod +x GoRecon && mv GoRecon /go/bin
-
-RUN adduser -D gorecon && chown -R gorecon:gorecon /app /go/bin 
 USER gouser
 
 ENTRYPOINT /go/bin/GoRecon ${TARGET}
