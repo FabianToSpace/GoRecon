@@ -8,13 +8,12 @@ func Enum4Linux() ServiceScan {
 		Name:             moduleName,
 		Description:      "Enum4Linux Samba Enumeration",
 		Tags:             []string{"default", "smb"},
-		Command:          "enum4linux",
-		Arguments:        []string{"-a"},
+		Command:          "enum4linux-ng",
+		Arguments:        []string{"-A", "-oA", "{{.OutputFile}}"},
 		ArgumentsInPlace: true,
 		TargetAppend:     true,
 		MatchPattern:     "^(netbios-ssn|microsoft-ds|ldap|smb)",
-		OutputFormat:     "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName + ".txt",
+		OutputFormat:     "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/" + moduleName,
 		TargetFormat:     "{{.Target}}",
-		OutFile:          true,
 	}
 }

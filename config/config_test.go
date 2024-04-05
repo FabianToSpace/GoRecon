@@ -78,7 +78,7 @@ debug: false
 	})
 
 	// Test for handling error when processing config with environment variables
-	t.Run("Error processing config with environment variables", func(t *testing.T) {
+	t.Run("Overwriting config with environment variables", func(t *testing.T) {
 		curdir, _ := os.Getwd()
 		tmp, _ := os.MkdirTemp("", "configtest")
 		os.Chdir(tmp)
@@ -112,7 +112,58 @@ threads: 1`), 0400)
 			t.Errorf("Invalid config values")
 		}
 
+		resetEnv()
+
 		os.Chdir(curdir)
 		os.RemoveAll(tmp)
 	})
+
+	// Test for handling error when processing config with environment variables
+	t.Run("Skip Configfile Loading", func(t *testing.T) {
+		curdir, _ := os.Getwd()
+		tmp, _ := os.MkdirTemp("", "configtest")
+		os.Chdir(tmp)
+
+		os.WriteFile("config.yaml", []byte(`portrange: 1
+outputformat: test
+outputfile: test.json
+debug: false
+threads: 1`), 0400)
+
+		if err := os.Setenv("SKIP_CONFIG_FILE", "true"); err != nil {
+			t.Errorf("Error setting environment variable: %v", err)
+		}
+
+		Config, err := GetConfig()
+		if err != nil {
+			t.Errorf("Error reading config file: %v", err)
+		}
+
+		if Config.PortRange != "1-65535" ||
+			Config.OutputFormat != "json" ||
+			Config.OutputFile != "recon.json" ||
+			Config.Debug != false ||
+			Config.Threads != 10 ||
+			len(Config.Plugins.PortScans) != 0 ||
+			len(Config.Plugins.ServiceScans) != 0 {
+			t.Errorf("Invalid config values")
+			t.Errorf("Config: %v", Config)
+		}
+
+		resetEnv()
+
+		os.Chdir(curdir)
+		os.RemoveAll(tmp)
+	})
+}
+
+func resetEnv() {
+	os.Unsetenv("PORT_RANGE")
+	os.Unsetenv("OUTPUT_FORMAT")
+	os.Unsetenv("OUTPUT_FILE")
+	os.Unsetenv("DEBUG")
+	os.Unsetenv("THREADS")
+	os.Unsetenv("PORT_SCANS")
+	os.Unsetenv("SERVICE_SCANS")
+	os.Unsetenv("SKIP_CONFIG_FILE")
 }

@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Connect to server",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "port": 40000,
+            "host": "127.0.0.1",
+            "remotePath": "/app",
+            "debugAdapter": "dlv-dap",
+            "preLaunchTask": "attach",
+            "showLog": true
+        },
+        {
+            "name": "Go Launch Package With IP Parameter",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${fileDirname}",
+            "args": [
+                "10.10.10.10"
+            ]
+        }
+    ]
+}

@@ -1,6 +1,8 @@
 package plugins
 
 import (
+	"strconv"
+
 	"github.com/FabianToSpace/GoRecon/config"
 	"github.com/FabianToSpace/GoRecon/logger"
 )
@@ -24,7 +26,8 @@ func Init() (config.Config, error) {
 }
 
 func LoadPortScanners() []PortScan {
-	Init()
+	Config, _ = Init()
+
 	allScanners := []PortScan{
 		NmapTcpTop(),
 		NmapUdpTop(),
@@ -41,11 +44,13 @@ func LoadPortScanners() []PortScan {
 		}
 	}
 
+	Logger.Debug("Plugins", "", "Loaded "+strconv.Itoa(len(scanners))+" Port scanners")
+
 	return scanners
 }
 
 func LoadServiceScanners() []ServiceScan {
-	Init()
+	Config, _ = Init()
 	allScanners := []ServiceScan{
 		Dirbuster(),
 		Whatweb(),
@@ -64,6 +69,8 @@ func LoadServiceScanners() []ServiceScan {
 			}
 		}
 	}
+
+	Logger.Debug("Plugins", "", "Loaded "+strconv.Itoa(len(scanners))+" Service scanners")
 
 	return scanners
 }
