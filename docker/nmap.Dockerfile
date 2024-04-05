@@ -1,4 +1,4 @@
-FROM uptospace/gorecon
+FROM uptospace/gorecon:latest
 
 RUN apk upgrade --update-cache --available \
     && apk add nmap nmap-scripts \

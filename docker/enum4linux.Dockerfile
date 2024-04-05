@@ -5,7 +5,7 @@ RUN apk upgrade --update-cache --available \
 
 RUN git clone https://github.com/cddmp/enum4linux-ng.git
 
-FROM uptospace/gorecon
+FROM uptospace/gorecon:latest
 
 WORKDIR /app
 
