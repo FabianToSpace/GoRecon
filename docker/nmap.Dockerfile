@@ -1,4 +1,4 @@
-FROM uptospace/gorecon:latest
+FROM uptospace/gorecon:0.0.6
 
 RUN apk upgrade --update-cache --available \
     && apk add nmap nmap-scripts \
@@ -6,6 +6,6 @@ RUN apk upgrade --update-cache --available \
 
 RUN adduser -D gorecon && chown -R gorecon:gorecon /go/bin 
 
-USER gouser
+USER gorecon
 
 ENTRYPOINT /go/bin/GoRecon ${TARGET}

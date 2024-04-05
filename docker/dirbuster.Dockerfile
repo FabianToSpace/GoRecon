@@ -7,11 +7,11 @@ RUN wget https://github.com/epi052/feroxbuster/releases/latest/download/x86_64-l
     && unzip -d /tmp/ feroxbuster.zip feroxbuster \
     && chmod +x /tmp/feroxbuster
 
-FROM uptospace/gorecon:latest
+FROM uptospace/gorecon:0.0.6
 
 COPY --from=builder /tmp/feroxbuster /usr/local/bin/feroxbuster
 RUN adduser -D gorecon && chown -R gorecon:gorecon /go/bin 
 
-USER gouser
+USER gorecon
 
 ENTRYPOINT /go/bin/GoRecon ${TARGET}

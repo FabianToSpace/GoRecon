@@ -1,27 +1,22 @@
-FROM golang:alpine3.19 as builder
+FROM alpine:3.19 as builder
 
 RUN apk upgrade --update-cache --available \
-    && apk git
+    && apk add git
 
 RUN git clone https://github.com/cddmp/enum4linux-ng.git
+RUN pwd
 
-FROM uptospace/gorecon:latest
-
-WORKDIR /app
-
-COPY --from=builder /enum4linux-ng /app
+FROM uptospace/gorecon:0.0.6
 
 RUN apk upgrade --update-cache --available \
-    && apk add samba-client python3 \
+    && apk add samba-client python3 py3-samba py3-ldap3 py3-yaml py3-impacket \
     && rm -rf /var/cache/apk/* \
     && ln -sf python3 /usr/bin/python
 
-RUN python3 -m ensurepip
-
-RUN pip3 install --no-cache-dir -r ./requirements.txt
+COPY --from=builder /enum4linux-ng/enum4linux-ng.py /usr/local/bin/enum4linux-ng
 
 RUN adduser -D gorecon && chown -R gorecon:gorecon /go/bin 
 
-USER gouser
+USER gorecon
 
 ENTRYPOINT /go/bin/GoRecon ${TARGET}

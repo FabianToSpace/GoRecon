@@ -6,4 +6,8 @@ ENV SERVICE_SCANS="whatweb"
 
 RUN go install github.com/FabianToSpace/GoRecon@v0.0.5
 
+RUN adduser -D gorecon && chown -R gorecon:gorecon /go/bin 
+
+USER gorecon
+
 ENTRYPOINT /go/bin/GoRecon ${TARGET}
