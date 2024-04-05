@@ -25,9 +25,8 @@ COPY --from=gorecon /go /go
 
 RUN ln -s /whatweb/whatweb /usr/local/bin/whatweb
 
+RUN adduser -D gorecon && chown -R gorecon:gorecon /go/bin  /whatweb
 
-# RUN adduser -D gorecon && chown -R gorecon:gorecon /go/bin 
-
-# USER gorecon
+USER gorecon
 
 ENTRYPOINT /go/bin/GoRecon ${TARGET}
