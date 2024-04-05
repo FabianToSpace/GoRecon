@@ -60,14 +60,14 @@ func TestEnum4Linux(t *testing.T) {
 	expectedName := "enum4linux"
 	expectedDescription := "Enum4Linux Samba Enumeration"
 	expectedTags := []string{"default", "smb"}
-	expectedCommand := "enum4linux"
-	expectedArguments := []string{"-a"}
+	expectedCommand := "enum4linux-ng"
+	expectedArguments := []string{"-A", "-oA", "{{.OutputFile}}"}
 	expectedArgumentsInPlace := true
 	expectedTargetAppend := true
 	expectedMatchPattern := "^(netbios-ssn|microsoft-ds|ldap|smb)"
-	expectedOutputFormat := "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/enum4linux.txt"
+	expectedOutputFormat := "results/{{.Target}}/scans/{{.Port}}-{{.Protocol}}/enum4linux"
 	expectedTargetFormat := "{{.Target}}"
-	expectedOutFile := true
+	expectedOutFile := false
 
 	result := Enum4Linux()
 	if result.Name != expectedName {

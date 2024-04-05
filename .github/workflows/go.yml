@@ -63,4 +63,4 @@ jobs:
           context: .
           push: false
           tags: uptospace/gorecon:latest
-          file: '{context}/docker/Dockerfile'
+          file: './docker/Dockerfile'
