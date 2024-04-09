@@ -113,3 +113,23 @@ func TestRabbitConnection_Consume(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestRabbitConnection_DeclareExchange(t *testing.T) {
+	mc := gomock.NewController(t)
+	defer mc.Finish()
+
+	mock_connection := mock_messaging.NewMockRabbitConnect(mc)
+
+	t.Run("Successful Declare Exchange", func(t *testing.T) {
+		mock_connection.EXPECT().DeclareExchange().Return(nil)
+		err := mock_connection.DeclareExchange()
+		assert.NoError(t, err)
+	})
+
+	t.Run("Failed Declare Exchange", func(t *testing.T) {
+		// Modify the connection URL to intentionally fail the connection
+		mock_connection.EXPECT().DeclareExchange().Return(errors.New("Error"))
+		err := mock_connection.DeclareExchange()
+		assert.Error(t, err)
+	})
+}

@@ -22,6 +22,7 @@ type RabbitConnect interface {
 	QueueConnect() error
 	PublishMessage(ServiceMessage) error
 	Consume() (<-chan amqp.Delivery, error)
+	DeclareExchange() error
 }
 
 type ConnectionInfo struct {
@@ -32,12 +33,13 @@ type ConnectionInfo struct {
 }
 
 type QueueInfo struct {
-	QueueName  string
-	Durable    bool
-	AutoDelete bool
-	Exclusive  bool
-	NoWait     bool
-	Arguments  amqp.Table
+	QueueName    string
+	ExchangeName string
+	Durable      bool
+	AutoDelete   bool
+	Exclusive    bool
+	NoWait       bool
+	Arguments    amqp.Table
 }
 
 func (r *RabbitConnection) Connect() error {
@@ -120,4 +122,21 @@ func (r *RabbitConnection) Consume() (<-chan amqp.Delivery, error) {
 		false,        // no wait
 		nil,          // args
 	)
+}
+
+func (r *RabbitConnection) DeclareExchange() error {
+	err := r.Channel.ExchangeDeclare(
+		r.QueueInfo.ExchangeName, // name
+		"fanout",                 // type
+		true,                     // durable
+		false,                    // auto-deleted
+		false,                    // internal
+		false,                    // no-wait
+		nil,                      // arguments
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

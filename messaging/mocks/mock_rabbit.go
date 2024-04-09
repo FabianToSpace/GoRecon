@@ -9,7 +9,7 @@ import (
 
 	messaging "github.com/FabianToSpace/GoRecon/messaging"
 	gomock "github.com/golang/mock/gomock"
-	amqp091_go "github.com/rabbitmq/amqp091-go"
+	amqp091 "github.com/rabbitmq/amqp091-go"
 )
 
 // MockRabbitConnect is a mock of RabbitConnect interface.
@@ -64,10 +64,10 @@ func (mr *MockRabbitConnectMockRecorder) Connect() *gomock.Call {
 }
 
 // Consume mocks base method.
-func (m *MockRabbitConnect) Consume() (<-chan amqp091_go.Delivery, error) {
+func (m *MockRabbitConnect) Consume() (<-chan amqp091.Delivery, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Consume")
-	ret0, _ := ret[0].(<-chan amqp091_go.Delivery)
+	ret0, _ := ret[0].(<-chan amqp091.Delivery)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -76,6 +76,20 @@ func (m *MockRabbitConnect) Consume() (<-chan amqp091_go.Delivery, error) {
 func (mr *MockRabbitConnectMockRecorder) Consume() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Consume", reflect.TypeOf((*MockRabbitConnect)(nil).Consume))
+}
+
+// DeclareExchange mocks base method.
+func (m *MockRabbitConnect) DeclareExchange() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeclareExchange")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeclareExchange indicates an expected call of DeclareExchange.
+func (mr *MockRabbitConnectMockRecorder) DeclareExchange() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeclareExchange", reflect.TypeOf((*MockRabbitConnect)(nil).DeclareExchange))
 }
 
 // PublishMessage mocks base method.
