@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  gorecon-nmap:
+    build:
+      context: ../
+      dockerfile: ./docker/nmap.Dockerfile
+    container_name: gorecon.nmap
+    env_file:
+      - ./.env
+    volumes:
+      - ./volumes/results:/app/results
+  gorecon-enum4linux:
+    build:
+      context: ../
+      dockerfile: ./docker/enum4linux.Dockerfile
+    container_name: gorecon.enum4linux
+    env_file:
+      - ./.env
+    volumes:
+      - ./volumes/results:/app/results
+  gorecon-dirbuster:
+    build:
+      context: ../
+      dockerfile: ./docker/dirbuster.Dockerfile
+    container_name: gorecon.dirbuster
+    env_file:
+      - ./.env
+    volumes:
+      - ./volumes/wordlists:/usr/share/seclists
+      - ./volumes/results:/app/results
+  gorecon-nikto:
+    build:
+      context: ../
+      dockerfile: ./docker/nikto.Dockerfile
+    container_name: gorecon.nikto
+    env_file:
+      - ./.env
+    volumes:
+      - ./volumes/results:/app/results
+  gorecon-whatweb:
+    build:
+      context: ../
+      dockerfile: ./docker/whatweb.Dockerfile
+    container_name: gorecon.whatweb
+    env_file:
+      - ./.env
+    volumes:
+      - ./volumes/results:/app/results

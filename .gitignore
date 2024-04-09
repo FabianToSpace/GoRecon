@@ -5,3 +5,4 @@ results/**/*
 gorecon
 config.yaml
 *.env
+docker/volumes/**/*
