@@ -15,12 +15,28 @@ type Config struct {
 	Debug        bool   `env:"DEBUG, default=false"`
 	Threads      int    `env:"THREADS, default=10"`
 	Plugins      Plugins
+	Messaging    Messaging
 	Initialized  bool
 }
 
 type Plugins struct {
 	PortScans    []string `env:"PORT_SCANS, delimiter=;"`
 	ServiceScans []string `env:"SERVICE_SCANS, delimiter=;"`
+}
+
+type Messaging struct {
+	RabbitMq RabbitMqConfig
+}
+
+type RabbitMqConfig struct {
+	Host      string `env:"RABBITMQ_HOST, default=127.0.0.1"`
+	Port      string `env:"RABBITMQ_PORT, default=5672"`
+	User      string `env:"RABBITMQ_USER, default=guest"`
+	Password  string `env:"RABBITMQ_PASSWORD, default=guest"`
+	Exchange  string `env:"RABBITMQ_EXCHANGE, default=gorecon"`
+	Sender    bool   `env:"RABBITMQ_SENDER, default=false"`
+	Receiver  bool   `env:"RABBITMQ_RECEIVER, default=false"`
+	QueueName string `env:"RABBITMQ_QUEUE_NAME, default=recon"`
 }
 
 var (

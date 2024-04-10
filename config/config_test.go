@@ -36,7 +36,16 @@ plugins:
   portscans:
     - nmap-tcp-all
   servicescans:
-    - whatweb`), 0400)
+    - whatweb
+messaging:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    exchange: gorecon
+    sender: true
+    receiver: true`), 0400)
 
 		Config, err := GetConfig()
 		if err != nil {
@@ -48,7 +57,14 @@ plugins:
 			Config.Debug != false ||
 			Config.Threads != 1 ||
 			len(Config.Plugins.PortScans) != 1 ||
-			len(Config.Plugins.ServiceScans) != 1 {
+			len(Config.Plugins.ServiceScans) != 1 ||
+			Config.Messaging.RabbitMq.Host != "localhost" ||
+			Config.Messaging.RabbitMq.Port != "5672" ||
+			Config.Messaging.RabbitMq.User != "guest" ||
+			Config.Messaging.RabbitMq.Password != "guest" ||
+			Config.Messaging.RabbitMq.Exchange != "gorecon" ||
+			Config.Messaging.RabbitMq.Sender != true ||
+			Config.Messaging.RabbitMq.Receiver != true {
 			t.Errorf("Invalid config values")
 		}
 
@@ -96,6 +112,14 @@ threads: 1`), 0400)
 		os.Setenv("THREADS", "5")
 		os.Setenv("PORT_SCANS", "nmap-tcp-all;nmap-tcp-top")
 		os.Setenv("SERVICE_SCANS", "whatweb;nikto")
+		os.Setenv("RABBITMQ_HOST", "localhost")
+		os.Setenv("RABBITMQ_PORT", "123")
+		os.Setenv("RABBITMQ_USER", "gst")
+		os.Setenv("RABBITMQ_PASSWORD", "gst")
+		os.Setenv("RABBITMQ_EXCHANGE", "recon")
+		os.Setenv("RABBITMQ_SENDER", "true")
+		os.Setenv("RABBITMQ_RECEIVER", "true")
+		os.Setenv("RABBITMQ_QUEUE_NAME", "queue")
 
 		Config, err := GetConfig()
 		if err != nil {
@@ -108,7 +132,15 @@ threads: 1`), 0400)
 			Config.Debug != true ||
 			Config.Threads != 5 ||
 			len(Config.Plugins.PortScans) != 2 ||
-			len(Config.Plugins.ServiceScans) != 2 {
+			len(Config.Plugins.ServiceScans) != 2 ||
+			Config.Messaging.RabbitMq.Host != "localhost" ||
+			Config.Messaging.RabbitMq.Port != "123" ||
+			Config.Messaging.RabbitMq.User != "gst" ||
+			Config.Messaging.RabbitMq.Password != "gst" ||
+			Config.Messaging.RabbitMq.Exchange != "recon" ||
+			Config.Messaging.RabbitMq.Sender != true ||
+			Config.Messaging.RabbitMq.Receiver != true ||
+			Config.Messaging.RabbitMq.QueueName != "queue" {
 			t.Errorf("Invalid config values")
 		}
 
@@ -166,4 +198,12 @@ func resetEnv() {
 	os.Unsetenv("PORT_SCANS")
 	os.Unsetenv("SERVICE_SCANS")
 	os.Unsetenv("SKIP_CONFIG_FILE")
+	os.Unsetenv("RABBITMQ_HOST")
+	os.Unsetenv("RABBITMQ_PORT")
+	os.Unsetenv("RABBITMQ_USER")
+	os.Unsetenv("RABBITMQ_PASSWORD")
+	os.Unsetenv("RABBITMQ_EXCHANGE")
+	os.Unsetenv("RABBITMQ_SENDER")
+	os.Unsetenv("RABBITMQ_RECEIVER")
+	os.Unsetenv("RABBITMQ_QUEUE_NAME")
 }

@@ -20,7 +20,7 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "args": [
-                "10.10.10.10"
+                "192.168.178.84"
             ]
         }
     ]

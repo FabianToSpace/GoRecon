@@ -9,6 +9,7 @@ import (
 
 	"github.com/FabianToSpace/GoRecon/config"
 	"github.com/FabianToSpace/GoRecon/logger"
+	"github.com/FabianToSpace/GoRecon/messaging"
 	"github.com/FabianToSpace/GoRecon/plugins"
 )
 
@@ -60,6 +61,55 @@ func main() {
 	WriteServicesReport()
 
 	StartServiceScanner()
+}
+
+func RabbitHandler() {
+	rabbitmq := messaging.RabbitConnection{
+		QueueInfo: messaging.QueueInfo{
+			QueueName:    Config.Messaging.RabbitMq.QueueName,
+			ExchangeName: Config.Messaging.RabbitMq.Exchange,
+			Durable:      true,
+			AutoDelete:   false,
+			Exclusive:    false,
+			NoWait:       false,
+			Arguments:    nil,
+		},
+		ConnectionInfo: messaging.ConnectionInfo{
+			User:     Config.Messaging.RabbitMq.User,
+			Password: Config.Messaging.RabbitMq.Password,
+			Host:     Config.Messaging.RabbitMq.Host,
+			Port:     Config.Messaging.RabbitMq.Port,
+		},
+	}
+
+	err := rabbitmq.Connect()
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer rabbitmq.Connection.Close()
+
+	err = rabbitmq.ChannelConnect()
+	failOnError(err, "Failed to connect to RabbitMQ Channel")
+	defer rabbitmq.Channel.Close()
+
+	err = rabbitmq.DeclareExchange()
+	failOnError(err, "Failed to declare RabbitMQ Exchange")
+
+	err = rabbitmq.QueueConnect()
+	failOnError(err, "Failed to declare RabbitMQ Queue")
+
+	if Config.Messaging.RabbitMq.Sender {
+
+	}
+
+	if Config.Messaging.RabbitMq.Receiver {
+
+	}
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		Logger.Error("main", "", fmt.Sprintf("%s: %s", msg, err))
+		os.Exit(1)
+	}
 }
 
 func CreatePaths() error {

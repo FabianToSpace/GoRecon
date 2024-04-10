@@ -65,43 +65,56 @@ func (p PortScan) Run(target string) []Service {
 
 	Logger.Info(p.Name, target, "Starting"+p.Description)
 
-	services := make([]Service, 0)
+	services := make(chan Service)
+
+	args := p.TokenizeArguments(target)
+
+	go p.executeCommand(target, args, services)
+
+	var results []Service
+
+	for r := range services {
+		results = append(results, r)
+	}
+
+	<-services
+
+	return results
+}
+
+func (p PortScan) executeCommand(target string, args []string, svc chan Service) {
 	reader, writer := io.Pipe()
 
 	cmdCtx, cmdDone := context.WithCancel(context.Background())
 
-	scannerStopped := make(chan struct{})
-	go func() {
-		defer close(scannerStopped)
-
-		scanner := bufio.NewScanner(reader)
-		for scanner.Scan() {
-			line := scanner.Text()
-
-			Logger.Debug(p.Name, target, line)
-
-			service := extractService(target, p.Name, line)
-			if service != (Service{}) {
-				services = append(services, service)
-			}
-		}
-	}()
-
-	args := p.TokenizeArguments(target)
-
 	cmd := exec.CommandContext(cmdCtx, p.Command, args...)
 	cmd.Stdout = writer
 	cmd.Stderr = writer
+
+	go scanOutput(reader, p.Name, target, svc)
 
 	_ = cmd.Start()
 	go func() {
 		_ = cmd.Wait()
 		cmdDone()
 		writer.Close()
+		close(svc)
 	}()
+
 	<-cmdCtx.Done()
+}
 
-	<-scannerStopped
+func scanOutput(reader *io.PipeReader, serviceName, target string, svc chan Service) {
+	defer reader.Close()
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Text()
 
-	return services
+		Logger.Debug(serviceName, target, line)
+
+		service := extractService(target, serviceName, line)
+		if service != (Service{}) {
+			svc <- service
+		}
+	}
 }
