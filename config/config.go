@@ -41,7 +41,7 @@ type RabbitMqConfig struct {
 
 var (
 	AllowedCommands = []string{
-		"nmap", "dirb", "feroxbuster", "whatweb", "nikto", "enum4linux",
+		"nmap", "dirb", "feroxbuster", "whatweb", "nikto", "enum4linux-ng",
 	}
 )
 

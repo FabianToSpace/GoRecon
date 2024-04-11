@@ -113,60 +113,68 @@ func (s ServiceScan) Run(service Service) (bool, error) {
 		target := fmt.Sprintf("%s:%d", service.Target, service.Port)
 		Logger.Start(s.Name, target, "Starting "+s.Description+" at Port "+fmt.Sprintf("%d", service.Port))
 
-		reader, writer := io.Pipe()
-
-		cmdCtx, cmdDone := context.WithCancel(context.Background())
-
-		scannerStopped := make(chan struct{})
-		go func() {
-			defer close(scannerStopped)
-
-			if s.OutFile {
-				filePath := s.TokenizeOutput(service)
-
-				outfile, err := os.Create(filePath)
-				if err != nil {
-					Logger.Error(s.Name, service.Target, err.Error())
-				}
-				defer outfile.Close()
-
-				fileWriter := bufio.NewWriter(outfile)
-				fileWriter.ReadFrom(reader)
-				fileWriter.Flush()
-			}
-
-			scanner := bufio.NewScanner(reader)
-			for scanner.Scan() {
-				line := scanner.Text()
-				Logger.Debug(s.Name, service.Target, line)
-			}
-		}()
-
 		args := s.TokenizeArguments(service)
 
-		cmd := exec.CommandContext(cmdCtx, s.Command, args...)
+		scannerStopped := make(chan struct{})
 
-		curdir, _ := os.Getwd()
-		cmd.Dir = curdir
+		go s.executeCommand(args, service, scannerStopped)
 
-		cmd.Stdout = writer
-		cmd.Stderr = writer
-
-		if err := cmd.Start(); err != nil {
-			Logger.Error(s.Name, service.Target, err.Error())
-		}
-
-		go func() {
-			defer cmdDone()
-			_ = cmd.Wait()
-			writer.Close()
-		}()
-		<-cmdCtx.Done()
+		Logger.Done(s.Name, service.Target, "Done")
 
 		<-scannerStopped
 
-		Logger.Done(s.Name, service.Target, "Done")
 		return true, nil
 	}
 	return false, nil
+}
+
+func (s ServiceScan) executeCommand(args []string, svc Service, scannerStopped chan struct{}) {
+	reader, writer := io.Pipe()
+
+	cmdCtx, cmdDone := context.WithCancel(context.Background())
+
+	cmd := exec.CommandContext(cmdCtx, s.Command, args...)
+	cmd.Stdout = writer
+	cmd.Stderr = writer
+
+	curdir, _ := os.Getwd()
+	cmd.Dir = curdir
+
+	go s.scanOutput(reader, svc, scannerStopped)
+
+	if err := cmd.Start(); err != nil {
+		Logger.Error(s.Name, svc.Target, err.Error())
+	}
+
+	go func() {
+		_ = cmd.Wait()
+		cmdDone()
+		writer.Close()
+	}()
+
+	<-cmdCtx.Done()
+}
+
+func (s ServiceScan) scanOutput(reader *io.PipeReader, service Service, scannerStopped chan struct{}) {
+	defer reader.Close()
+	defer close(scannerStopped)
+	if s.OutFile {
+		filePath := s.TokenizeOutput(service)
+
+		outfile, err := os.Create(filePath)
+		if err != nil {
+			Logger.Error(s.Name, service.Target, err.Error())
+		}
+		defer outfile.Close()
+
+		fileWriter := bufio.NewWriter(outfile)
+		fileWriter.ReadFrom(reader)
+		fileWriter.Flush()
+	}
+
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Text()
+		Logger.Debug(s.Name, service.Target, line)
+	}
 }
