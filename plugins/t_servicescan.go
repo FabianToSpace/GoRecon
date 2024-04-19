@@ -156,25 +156,35 @@ func (s ServiceScan) executeCommand(args []string, svc Service, scannerStopped c
 }
 
 func (s ServiceScan) scanOutput(reader *io.PipeReader, service Service, scannerStopped chan struct{}) {
-	defer reader.Close()
-	defer close(scannerStopped)
-	if s.OutFile {
-		filePath := s.TokenizeOutput(service)
+	defer func() {
+		reader.Close()
+		close(scannerStopped)
+	}()
 
-		outfile, err := os.Create(filePath)
+	if s.OutFile {
+		outputFilePath := s.TokenizeOutput(service)
+		err := s.writeOutputToFile(reader, outputFilePath)
 		if err != nil {
 			Logger.Error(s.Name, service.Target, err.Error())
 		}
-		defer outfile.Close()
-
-		fileWriter := bufio.NewWriter(outfile)
-		fileWriter.ReadFrom(reader)
-		fileWriter.Flush()
 	}
 
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		line := scanner.Text()
-		Logger.Debug(s.Name, service.Target, line)
+		Logger.Debug(s.Name, service.Target, scanner.Text())
 	}
+}
+
+func (s ServiceScan) writeOutputToFile(reader *io.PipeReader, filePath string) error {
+	outfile, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer outfile.Close()
+
+	fileWriter := bufio.NewWriter(outfile)
+	defer fileWriter.Flush()
+
+	_, err = io.Copy(fileWriter, reader)
+	return err
 }

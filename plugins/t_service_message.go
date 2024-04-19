@@ -1,15 +1,13 @@
-package messaging
+package plugins
 
 import (
 	"bytes"
 	"encoding/json"
-
-	"github.com/FabianToSpace/GoRecon/plugins"
 )
 
 type ServiceMessage struct {
 	Target  string
-	Service plugins.Service
+	Service Service
 }
 
 func (m *ServiceMessage) Serialize() ([]byte, error) {

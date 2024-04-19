@@ -5,11 +5,13 @@ import (
 
 	"github.com/FabianToSpace/GoRecon/config"
 	"github.com/FabianToSpace/GoRecon/logger"
+	"github.com/FabianToSpace/GoRecon/messaging"
 )
 
 var (
-	Config config.Config
-	Logger logger.ILogger
+	Config           config.Config
+	Logger           logger.ILogger
+	RabbitConnection = messaging.RabbitConnection{}
 )
 
 func Init() (config.Config, error) {
@@ -20,7 +22,14 @@ func Init() (config.Config, error) {
 		}
 		Logger = logger.Logger(&Config)
 		Config.Initialized = true
-		return Config, nil
+	}
+	RabbitConnection = messaging.RabbitConnection{
+		ConnectionInfo: messaging.ConnectionInfo{
+			User:     Config.Messaging.RabbitMq.User,
+			Password: Config.Messaging.RabbitMq.Password,
+			Host:     Config.Messaging.RabbitMq.Host,
+			Port:     Config.Messaging.RabbitMq.Port,
+		},
 	}
 	return Config, nil
 }

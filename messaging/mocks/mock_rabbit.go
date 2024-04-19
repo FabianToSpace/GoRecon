@@ -7,7 +7,6 @@ package mock_messaging
 import (
 	reflect "reflect"
 
-	messaging "github.com/FabianToSpace/GoRecon/messaging"
 	gomock "github.com/golang/mock/gomock"
 	amqp091 "github.com/rabbitmq/amqp091-go"
 )
@@ -93,7 +92,7 @@ func (mr *MockRabbitConnectMockRecorder) DeclareExchange() *gomock.Call {
 }
 
 // PublishMessage mocks base method.
-func (m *MockRabbitConnect) PublishMessage(arg0 messaging.ServiceMessage) error {
+func (m *MockRabbitConnect) PublishMessage(arg0 []byte) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PublishMessage", arg0)
 	ret0, _ := ret[0].(error)

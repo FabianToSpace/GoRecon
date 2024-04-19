@@ -79,7 +79,30 @@ func (p PortScan) Run(target string) []Service {
 
 	<-services
 
+	if Config.Messaging.RabbitMq.Sender {
+
+	}
+
 	return results
+}
+
+func (p PortScan) handleRabbitMq(services []Service) {
+	if Config.Messaging.RabbitMq.Sender {
+		for _, service := range services {
+			msg := ServiceMessage{
+				Target:  service.Target,
+				Service: service,
+			}
+
+			msgBytes, err := msg.Serialize()
+
+			if err != nil {
+				Logger.Error(p.Name, service.Target, err.Error())
+				continue
+			}
+
+		}
+	}
 }
 
 func (p PortScan) executeCommand(target string, args []string, svc chan Service) {
@@ -107,6 +130,7 @@ func (p PortScan) executeCommand(target string, args []string, svc chan Service)
 func scanOutput(reader *io.PipeReader, serviceName, target string, svc chan Service) {
 	defer reader.Close()
 	scanner := bufio.NewScanner(reader)
+
 	for scanner.Scan() {
 		line := scanner.Text()
 

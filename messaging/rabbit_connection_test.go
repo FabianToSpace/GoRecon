@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/FabianToSpace/GoRecon/messaging"
 	mock_messaging "github.com/FabianToSpace/GoRecon/messaging/mocks"
 	"github.com/golang/mock/gomock"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -79,14 +78,14 @@ func TestRabbitConnection_PublishMessage(t *testing.T) {
 
 	t.Run("Successful Publish Message", func(t *testing.T) {
 		mock_connection.EXPECT().PublishMessage(gomock.Any()).Return(nil)
-		err := mock_connection.PublishMessage(messaging.ServiceMessage{})
+		err := mock_connection.PublishMessage([]byte(""))
 		assert.NoError(t, err)
 	})
 
 	t.Run("Failed Publish Message", func(t *testing.T) {
 		// Modify the connection URL to intentionally fail the connection
 		mock_connection.EXPECT().PublishMessage(gomock.Any()).Return(errors.New("Error"))
-		err := mock_connection.PublishMessage(messaging.ServiceMessage{})
+		err := mock_connection.PublishMessage([]byte(""))
 		assert.Error(t, err)
 	})
 }

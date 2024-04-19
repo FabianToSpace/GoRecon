@@ -20,7 +20,7 @@ type RabbitConnect interface {
 	Connect() error
 	ChannelConnect() error
 	QueueConnect() error
-	PublishMessage(ServiceMessage) error
+	PublishMessage([]byte) error
 	Consume() (<-chan amqp.Delivery, error)
 	DeclareExchange() error
 }
@@ -87,16 +87,13 @@ func (r *RabbitConnection) QueueConnect() error {
 	return nil
 }
 
-func (r *RabbitConnection) PublishMessage(message ServiceMessage) error {
+func (r *RabbitConnection) PublishMessage(message []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	body, err := message.Serialize()
-	if err != nil {
-		return err
-	}
+	body := message
 
-	err = r.Channel.PublishWithContext(ctx,
+	err := r.Channel.PublishWithContext(ctx,
 		"",           // exchange
 		r.Queue.Name, // routing key
 		false,        // mandatory

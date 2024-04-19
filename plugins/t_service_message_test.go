@@ -1,17 +1,14 @@
-package messaging_test
+package plugins
 
 import (
 	"bytes"
 	"reflect"
 	"testing"
-
-	"github.com/FabianToSpace/GoRecon/messaging"
-	"github.com/FabianToSpace/GoRecon/plugins"
 )
 
 func TestSerialize(t *testing.T) {
-	message := &messaging.ServiceMessage{Target: "localhost",
-		Service: plugins.Service{
+	message := &ServiceMessage{Target: "localhost",
+		Service: Service{
 			Target:   "Target",
 			Protocol: "tcp",
 			Port:     80,
@@ -33,9 +30,9 @@ func TestSerialize(t *testing.T) {
 func TestDeserialize(t *testing.T) {
 	jsonBytes := []byte("{\"Target\":\"localhost\",\"Service\":{\"Target\":\"Target\",\"Protocol\":\"tcp\",\"Port\":80,\"Name\":\"\",\"Secure\":false,\"Version\":\"\",\"Scheme\":\"\"}}\n")
 
-	deserializedMessage := messaging.ServiceMessage{}
-	expected := &messaging.ServiceMessage{Target: "localhost",
-		Service: plugins.Service{
+	deserializedMessage := ServiceMessage{}
+	expected := &ServiceMessage{Target: "localhost",
+		Service: Service{
 			Target:   "Target",
 			Protocol: "tcp",
 			Port:     80,
